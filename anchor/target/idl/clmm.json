@@ -1,0 +1,827 @@
+{
+  "address": "2T8KvHs6Q881FpnC2BZc7g9G5jpHw5ujdcZLHmLfSZLr",
+  "metadata": {
+    "name": "clmm",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "decrease_liquidity",
+      "discriminator": [
+        160,
+        38,
+        208,
+        111,
+        104,
+        91,
+        44,
+        1
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "lower_tick_array",
+          "writable": true
+        },
+        {
+          "name": "upper_tick_array",
+          "writable": true
+        },
+        {
+          "name": "position"
+        },
+        {
+          "name": "user_token_0",
+          "writable": true
+        },
+        {
+          "name": "user_token_1",
+          "writable": true
+        },
+        {
+          "name": "pool_token_0",
+          "writable": true
+        },
+        {
+          "name": "pool_token_1",
+          "writable": true
+        },
+        {
+          "name": "token_mint_0",
+          "relations": [
+            "pool"
+          ]
+        },
+        {
+          "name": "token_mint_1",
+          "relations": [
+            "pool"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "lower_tick",
+          "type": "i32"
+        },
+        {
+          "name": "upper_tick",
+          "type": "i32"
+        },
+        {
+          "name": "liquidty_amount",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "increase_liquidity",
+      "discriminator": [
+        46,
+        156,
+        243,
+        118,
+        13,
+        205,
+        251,
+        178
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "lower_tick_array",
+          "writable": true
+        },
+        {
+          "name": "upper_tick_array",
+          "writable": true
+        },
+        {
+          "name": "position"
+        },
+        {
+          "name": "user_token_0",
+          "writable": true
+        },
+        {
+          "name": "user_token_1",
+          "writable": true
+        },
+        {
+          "name": "pool_token_0",
+          "writable": true
+        },
+        {
+          "name": "pool_token_1",
+          "writable": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_mint_0",
+          "relations": [
+            "pool"
+          ]
+        },
+        {
+          "name": "token_mint_1",
+          "relations": [
+            "pool"
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "lower_tick",
+          "type": "i32"
+        },
+        {
+          "name": "upper_tick",
+          "type": "i32"
+        },
+        {
+          "name": "liquidty_amount",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "initialize_pool",
+      "discriminator": [
+        95,
+        180,
+        10,
+        172,
+        84,
+        174,
+        232,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_0"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_1"
+              },
+              {
+                "kind": "arg",
+                "path": "tick_spacing"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint_0",
+          "writable": true
+        },
+        {
+          "name": "token_mint_1",
+          "writable": true
+        },
+        {
+          "name": "token_vault_0",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_vault_1",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "tick_spacing",
+          "type": "i32"
+        },
+        {
+          "name": "initial_sqrt_price",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "open_position",
+      "discriminator": [
+        135,
+        128,
+        47,
+        77,
+        15,
+        152,
+        240,
+        49
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "lower_tick_array",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  99,
+                  107,
+                  95,
+                  97,
+                  114,
+                  114,
+                  97,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "tick_array_lower_start_index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "upper_tick_array",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  99,
+                  107,
+                  95,
+                  97,
+                  114,
+                  114,
+                  97,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "tick_array_upper_start_index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "lower_tick"
+              },
+              {
+                "kind": "arg",
+                "path": "upper_tick"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_0",
+          "writable": true
+        },
+        {
+          "name": "user_token_1",
+          "writable": true
+        },
+        {
+          "name": "pool_token_0",
+          "writable": true
+        },
+        {
+          "name": "pool_token_1",
+          "writable": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_mint_0",
+          "relations": [
+            "pool"
+          ]
+        },
+        {
+          "name": "token_mint_1",
+          "relations": [
+            "pool"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "lower_tick",
+          "type": "i32"
+        },
+        {
+          "name": "upper_tick",
+          "type": "i32"
+        },
+        {
+          "name": "liquidty_amount",
+          "type": "u128"
+        },
+        {
+          "name": "_tick_array_lower_start_index",
+          "type": "i32"
+        },
+        {
+          "name": "_tick_array_upper_start_index",
+          "type": "i32"
+        }
+      ]
+    },
+    {
+      "name": "swap",
+      "discriminator": [
+        248,
+        198,
+        158,
+        145,
+        225,
+        117,
+        135,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "user_token_0",
+          "writable": true
+        },
+        {
+          "name": "user_token_1",
+          "writable": true
+        },
+        {
+          "name": "pool_token_0",
+          "writable": true
+        },
+        {
+          "name": "pool_token_1",
+          "writable": true
+        },
+        {
+          "name": "tick_array",
+          "writable": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_in",
+          "type": "u64"
+        },
+        {
+          "name": "swap_token_0_for_1",
+          "type": "bool"
+        },
+        {
+          "name": "amount_out_minimum",
+          "type": "u64"
+        }
+      ],
+      "returns": "u64"
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Pool",
+      "discriminator": [
+        241,
+        154,
+        109,
+        4,
+        17,
+        177,
+        109,
+        188
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    },
+    {
+      "name": "TickArray",
+      "discriminator": [
+        69,
+        97,
+        189,
+        190,
+        110,
+        7,
+        66,
+        187
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic Overflow"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidTickRange",
+      "msg": "Invalid Tick Range"
+    },
+    {
+      "code": 6002,
+      "name": "InsufficientInputAmount",
+      "msg": "Insufficient Input Amount"
+    },
+    {
+      "code": 6003,
+      "name": "SlippageExceeded",
+      "msg": "Slippage Exceeded"
+    },
+    {
+      "code": 6004,
+      "name": "InsufficientLiquidity",
+      "msg": "Insufficient Liquidity"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidTickSpacing",
+      "msg": "Invalid Tick Spacing"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidPrice",
+      "msg": "Invalid Price"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidPositionOwner",
+      "msg": "Invalid Position Owner"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidPositionRange",
+      "msg": "Invalid Position Range"
+    },
+    {
+      "code": 6009,
+      "name": "TickNotFound",
+      "msg": "Tick Not Found"
+    },
+    {
+      "code": 6010,
+      "name": "Token0TransferFailed",
+      "msg": "Token 0 Transfer Failed"
+    },
+    {
+      "code": 6011,
+      "name": "Token1TransferFailed",
+      "msg": "Token 1 Transfer Failed"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidBump",
+      "msg": "Invalid Bump"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidTickArrayAccount",
+      "msg": "Invalid Tick Array Account"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTokenPair",
+      "msg": "Invalid Token Pair"
+    },
+    {
+      "code": 6015,
+      "name": "MintRangeMustCoverCurrentPrice",
+      "msg": "Mint Range Must Cover Current Price"
+    },
+    {
+      "code": 6016,
+      "name": "BurnRangeMustCoverCurrentPrice",
+      "msg": "Burn Range Must Cover Current Price"
+    },
+    {
+      "code": 6017,
+      "name": "InsufficientPoolLiquidity",
+      "msg": "Insufficient Pool Liquidity"
+    },
+    {
+      "code": 6018,
+      "name": "InvalidPoolLiquidity",
+      "msg": "Invalid Pool Liquidity"
+    },
+    {
+      "code": 6019,
+      "name": "NoLiquidityToRemove",
+      "msg": "No Liquidity To Remove"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidTickArrayStartIndex",
+      "msg": "Invalid Tick Array Start Index"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidTickArrayBump",
+      "msg": "Invalid Tick Array Bump"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidTickArrayPool",
+      "msg": "Invalid Tick Array Pool"
+    }
+  ],
+  "types": [
+    {
+      "name": "Pool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_mint_0",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint_1",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_vault_0",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_vault_1",
+            "type": "pubkey"
+          },
+          {
+            "name": "global_liquidity",
+            "type": "u128"
+          },
+          {
+            "name": "sqrt_price_x96",
+            "type": "u128"
+          },
+          {
+            "name": "current_tick",
+            "type": "i32"
+          },
+          {
+            "name": "tick_spacing",
+            "type": "i32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "liquidity",
+            "type": "u128"
+          },
+          {
+            "name": "tick_lower",
+            "type": "i32"
+          },
+          {
+            "name": "tick_upper",
+            "type": "i32"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "pool",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TickArray",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool",
+            "type": "pubkey"
+          },
+          {
+            "name": "starting_tick",
+            "type": "i32"
+          },
+          {
+            "name": "ticks",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "TickInfo"
+                  }
+                },
+                30
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TickInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "liquidity_gross",
+            "type": "u128"
+          },
+          {
+            "name": "liquidity_net",
+            "type": "i128"
+          }
+        ]
+      }
+    }
+  ]
+}

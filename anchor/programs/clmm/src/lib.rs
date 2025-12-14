@@ -1,9 +1,10 @@
 #![allow(clippy::result_large_err)]
+#![allow(unexpected_cfgs)]
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::*;
+use anchor_spl::token::{self, Mint, TokenAccount, Transfer, Token};
 
-declare_id!("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
+declare_id!("2T8KvHs6Q881FpnC2BZc7g9G5jpHw5ujdcZLHmLfSZLr");
 
 #[program]
 pub mod clmm {
@@ -246,7 +247,85 @@ pub mod clmm {
     }
 
     pub fn swap(ctx: Context<Swap>, amount_in: u64, swap_token_0_for_1: bool, amount_out_minimum: u64) -> Result<u64> {
-        Ok(())
+        let pool = &mut ctx.accounts.pool;
+
+        require!(pool.global_liquidity > 0, ClmmError::InsufficientPoolLiquidity);
+        require!(amount_in > 0, ClmmError::InsufficientInputAmount);
+
+        let (amount_in_used, amount_out_calculated, new_sqrt_price_x96) = swap_segment(
+            pool.sqrt_price_x96, 
+            pool.global_liquidity, 
+            amount_in, 
+            swap_token_0_for_1
+        )?;
+
+        require!(amount_out_calculated >= amount_out_minimum, ClmmError::SlippageExceeded);
+
+        let seeds = [
+            b"pool",
+            pool.token_mint_0.as_ref(),
+            pool.token_mint_1.as_ref(),
+            &pool.tick_spacing.to_le_bytes(),
+            &[pool.bump]
+        ];
+        let signer_seeds = &[&seeds[..]];
+
+        if swap_token_0_for_1 {
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.user_token_0.to_account_info(),
+                        to: ctx.accounts.pool_token_0.to_account_info(),
+                        authority: ctx.accounts.payer.to_account_info(),
+                    },
+                ),
+                amount_in_used,
+            )?;
+
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(), 
+                    Transfer {
+                        from: ctx.accounts.pool_token_1.to_account_info(),
+                        to: ctx.accounts.user_token_1.to_account_info(),
+                        authority: pool.to_account_info()
+                    }, 
+                    signer_seeds,
+                ),
+                amount_out_calculated,
+            )?;
+        } else {
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),     
+                    Transfer {
+                        from: ctx.accounts.user_token_1.to_account_info(),
+                        to: ctx.accounts.pool_token_1.to_account_info(),
+                        authority: ctx.accounts.payer.to_account_info()
+                    },
+                ),
+                amount_in_used,
+            )?;
+
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(), 
+                    Transfer {
+                        from: ctx.accounts.pool_token_0.to_account_info(),
+                        to: ctx.accounts.user_token_0.to_account_info(),
+                        authority: pool.to_account_info(),
+                    }, 
+                    signer_seeds,
+                ),
+                amount_out_calculated,
+            )?;
+        }
+
+        pool.sqrt_price_x96 = new_sqrt_price_x96;
+        pool.current_tick = get_tick_at_sqrt_price(new_sqrt_price_x96)?;
+
+        Ok(amount_out_calculated)
     }
 }
 
@@ -265,7 +344,9 @@ pub struct InitializePool<'info> {
     )]
     pub pool: Account<'info, Pool>,
 
+    #[account(mut)]
     pub token_mint_0: Account<'info, Mint>,
+    #[account(mut)]
     pub token_mint_1: Account<'info, Mint>,
 
     #[account(
@@ -303,7 +384,7 @@ pub struct OpenPosition<'info> {
         init_if_needed,
         payer = payer,
         space = TickArray::SPACE,
-        seeds = [b"tick_array", pool.key().as_ref(), &tick_array_lower_start_index.to_le_bytes()],
+        seeds = [b"tick_array", pool.key().as_ref(), &tick_array_lower_start_index.to_le_bytes().as_ref()],
         bump
     )]
     pub lower_tick_array: Account<'info, TickArray>,
@@ -311,7 +392,7 @@ pub struct OpenPosition<'info> {
         init_if_needed,
         payer = payer,
         space = TickArray::SPACE,
-        seeds = [b"tick_array", pool.key().as_ref(), &tick_array_upper_start_index.to_le_bytes()],
+        seeds = [b"tick_array", pool.key().as_ref(), &tick_array_upper_start_index.to_le_bytes().as_ref()],
         bump
     )]
     pub upper_tick_array: Account<'info, TickArray>,
@@ -324,8 +405,8 @@ pub struct OpenPosition<'info> {
             b"position",
             owner.key().as_ref(),
             pool.key().as_ref(),
-            &lower_tick.to_le_bytes(),
-            &upper_tick.to_le_bytes(),
+            &lower_tick.to_le_bytes().as_ref(),
+            &upper_tick.to_le_bytes().as_ref(),
         ],
         bump
     )]
@@ -397,8 +478,8 @@ pub struct IncreaseLiquidity<'info> {
 
     pub token_mint_0: Account<'info, Mint>,
     pub token_mint_1: Account<'info, Mint>,
-    pub token_program: Account<'info, Token>,
-    pub system_program: Account<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -451,88 +532,37 @@ pub struct DecreaseLiquidity<'info> {
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
-
 }
 
 #[derive(Accounts)]
-#[instruction(lower_tick: i32, upper_tick: i32, tick_array_lower_start_index: i32, tick_array_upper_start_index: i32,)]
-pub struct ClosePosition<'info> {
-    #[account(mut)]
-    pub owner: Signer<'info>,
+// #[instruction(amount_in: u64, swap_token_0_for_1: bool, amount_out_minimum: u64)]
+pub struct Swap<'info> {
     #[account(mut)]
     pub pool: Account<'info, Pool>,
-    #[account(
-        mut,
-        seeds = [b"tick_array", pool.key().as_ref(), &tick_array_lower_start_index.to_le_bytes()],
-        bump
-    )]
-    pub lower_tick_array: Account<'info, TickArray>,
-
-    #[account(
-        mut,
-        seeds = [b"tick_array", pool.key().as_ref(), &tick_array_upper_start_index.to_le_bytes()],
-        bump
-    )]
-    pub upper_tick_array: Account<'info, TickArray>,
-
-    #[account(
-        mut,
-        close = owner,
-        seeds = [b"position", owner.key().as_ref(), pool.key().as_ref(), &lower_tick.to_le_bytes(), &upper_tick.to_le_bytes()],
-        bump = position.bump,
-        has_one = owner,
-        has_one = pool,
-    )]
-    pub position: Account<'info, Position>,
-
     #[account(mut)]
     pub user_token_0: Account<'info, TokenAccount>,
     #[account(mut)]
     pub user_token_1: Account<'info, TokenAccount>,
-
-    #[account(
-        mut,
-        constraint = pool_token_0.mint == pool.token_mint_0
-    )]
-    pub pool_token_0: Account<'info, TokenAccount>,
-    #[account(
-        mut,
-        constraint = pool_token_1.mint == pool.token_mint_1
-    )]
-    pub pool_token_1: Account<'info, TokenAccount>,
-    pub token_program: Program<'info, Token>,
-}
-
-#[derive(Accounts)]
-#[instruction(lower_tick: i32, upper_tick: i32, liquidity_amount: u128)]
-pub struct Burn<'info> {
-    #[account(mut)]
-    pub owner: Signer<'info>,
-    #[account(mut)]
-    pub pool: Account<'info, Pool>,
-
-    #[account(
-        mut,
-        close = owner,
-        seeds = [b"position", owner.key().as_ref(), pool.key().as_ref(), &lower_tick.to_le_bytes(), &upper_tick.to_le_bytes()],
-        bump = position.bump,
-    )]
-    pub position: Account<'info, Position>,
-
-    #[account(mut)]
-    pub tick_array_lower: Account<'info, TickArray>,
-    #[account(mut)]
-    pub tick_array_upper: Account<'info, TickArray>,
-
     #[account(mut)]
     pub pool_token_0: Account<'info, TokenAccount>,
     #[account(mut)]
     pub pool_token_1: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub user_token_0: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub user_token_1: Account<'info, TokenAccount>,
 
+    #[account(
+        mut,
+        constraint = tick_array.key() == Pubkey::find_program_address(
+            &[
+                b"tick_array",
+                pool.key().as_ref(),
+                &TickArray::get_starting_tick_index(pool.current_tick, pool.tick_spacing).to_le_bytes()
+            ],
+            &crate::ID,
+        ).0 @ ClmmError::InvalidTickArrayAccount
+    )]
+    pub tick_array: Account<'info, TickArray>,
+
+    #[account(mut)]
+    pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
@@ -654,7 +684,7 @@ impl TickArray {
     }
 
     pub fn get_tick_info_mutable(&mut self, tick: i32, tick_spacing: i32) -> Result<&mut TickInfo> {
-        let tick_per_array_i32 = TICKS_PER_ARRAY as i32;
+        let ticks_per_array_i32 = TICKS_PER_ARRAY as i32;
         let offset = (tick
                 .checked_div(tick_spacing)
                 .ok_or(ClmmError::ArithmeticOverflow)?)

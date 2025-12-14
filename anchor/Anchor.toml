@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-clmm = "Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe"
+clmm = "2T8KvHs6Q881FpnC2BZc7g9G5jpHw5ujdcZLHmLfSZLr"
 
 [registry]
 url = "https://api.apr.dev"
