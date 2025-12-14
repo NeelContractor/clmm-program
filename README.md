@@ -1,3 +1,5 @@
 # clmm
 
-- Currently building. contract, fe, tests left
+- Currently building. 
+- contract done 
+- fe, tests left
