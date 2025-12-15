@@ -21,7 +21,7 @@ export function getClmmProgramId(cluster: Cluster) {
     case 'devnet':
     case 'testnet':
       // This is the program ID for the Counter program on devnet and testnet.
-      return new PublicKey('2T8KvHs6Q881FpnC2BZc7g9G5jpHw5ujdcZLHmLfSZLr')
+      return new PublicKey('88KQMA65EwtZwyFCF16mAMZgNPjdcQCSwr2PXnMsKFEZ')
     case 'mainnet-beta':
     default:
       return CLMM_PROGRAM_ID

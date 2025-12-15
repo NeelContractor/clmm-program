@@ -1,5 +1,5 @@
 {
-  "address": "2T8KvHs6Q881FpnC2BZc7g9G5jpHw5ujdcZLHmLfSZLr",
+  "address": "88KQMA65EwtZwyFCF16mAMZgNPjdcQCSwr2PXnMsKFEZ",
   "metadata": {
     "name": "clmm",
     "version": "0.1.0",
@@ -38,7 +38,8 @@
           "writable": true
         },
         {
-          "name": "position"
+          "name": "position",
+          "writable": true
         },
         {
           "name": "user_token_0",
@@ -122,7 +123,8 @@
           "writable": true
         },
         {
-          "name": "position"
+          "name": "position",
+          "writable": true
         },
         {
           "name": "user_token_0",

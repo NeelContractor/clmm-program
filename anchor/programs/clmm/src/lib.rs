@@ -4,7 +4,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer, Token};
 
-declare_id!("2T8KvHs6Q881FpnC2BZc7g9G5jpHw5ujdcZLHmLfSZLr");
+declare_id!("88KQMA65EwtZwyFCF16mAMZgNPjdcQCSwr2PXnMsKFEZ");
 
 #[program]
 pub mod clmm {
@@ -33,6 +33,11 @@ pub mod clmm {
         let pool = &mut ctx.accounts.pool;
         let position = &mut ctx.accounts.position;
 
+        require!(lower_tick < upper_tick, ClmmError::InvalidTickRange);
+        require!(lower_tick % pool.tick_spacing == 0, ClmmError::InvalidTickRange);
+        require!(upper_tick % pool.tick_spacing == 0, ClmmError::InvalidTickRange);
+        require!(pool.current_tick >= lower_tick && pool.current_tick < upper_tick, ClmmError::MintRangeMustCoverCurrentPrice);
+        
         require!(liquidty_amount > 0, ClmmError::InsufficientInputAmount);
 
         let lower_tick_array = &mut ctx.accounts.lower_tick_array;
@@ -410,7 +415,7 @@ pub struct OpenPosition<'info> {
         ],
         bump
     )]
-    pub position: Account<'info, Position>,
+    pub position: Box<Account<'info, Position>>,
 
     #[account(mut)]
     pub user_token_0: Account<'info, TokenAccount>,
@@ -445,10 +450,11 @@ pub struct IncreaseLiquidity<'info> {
     pub upper_tick_array: Account<'info, TickArray>,
 
     #[account(
+        mut,  // ADD THIS
         constraint = position.pool == pool.key() @ ClmmError::InvalidPositionRange,
         constraint = position.owner == payer.key() @ ClmmError::InvalidPositionOwner,
     )]
-    pub position: Account<'info, Position>,
+    pub position: Box<Account<'info, Position>>,
 
     #[account(
         mut,
@@ -500,10 +506,11 @@ pub struct DecreaseLiquidity<'info> {
     pub upper_tick_array: Account<'info, TickArray>,
 
     #[account(
+        mut,
         constraint = position.pool == pool.key() @ ClmmError::InvalidPositionRange,
         constraint = position.owner == payer.key() @ ClmmError::InvalidPositionOwner,
     )]
-    pub position: Account<'info, Position>,
+    pub position: Box<Account<'info, Position>>,
 
     #[account(
         mut,
@@ -658,16 +665,13 @@ pub const TICKS_PER_ARRAY: usize = 30;
 pub struct TickArray {
     pub pool: Pubkey,
     pub starting_tick: i32,
+    #[max_len(TICKS_PER_ARRAY)]
     pub ticks: [TickInfo; TICKS_PER_ARRAY],
     pub bump: u8
 }
 
 impl TickArray {
-    pub const SPACE: usize = 8 + //discriminator
-        32 + //pool
-        4 + // starting_tick
-        TICKS_PER_ARRAY * 48 + //tick
-        1; // bump
+    pub const SPACE: usize = 8 + 32 + 4 + (4 + TICKS_PER_ARRAY * 33) + 1;
 
     pub fn get_starting_tick_index(tick: i32, tick_spacing: i32) -> i32 {
         let ticks_per_array_i32 = TICKS_PER_ARRAY as i32;

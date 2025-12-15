@@ -1,4 +1,4 @@
-Error: Function _ZN4clmm9__private8__global13open_position17hfc4ab4476b9d98bcE Stack offset of 7656 exceeded max offset of 4096 by 3560 bytes, please minimize large stack variables. Estimated function frame size: 7744 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
+Error: Function _ZN4clmm9__private8__global13open_position17hfc4ab4476b9d98bcE Stack offset of 7464 exceeded max offset of 4096 by 3368 bytes, please minimize large stack variables. Estimated function frame size: 7552 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
 
 Error: A function call in method _ZN4clmm9__private8__global13open_position17hfc4ab4476b9d98bcE overwrites values in the frame. Please, decrease stack usage or remove parameters from the call. The function call may cause undefined behavior during execution.
 
@@ -14,13 +14,13 @@ Error: A function call in method _ZN4clmm9__private8__global13open_position17hfc
 
 Error: A function call in method _ZN4clmm9__private8__global13open_position17hfc4ab4476b9d98bcE overwrites values in the frame. Please, decrease stack usage or remove parameters from the call. The function call may cause undefined behavior during execution.
 
-Error: Function _ZN4clmm9__private8__global18increase_liquidity17h386a0ddf4d1a57edE Stack offset of 7616 exceeded max offset of 4096 by 3520 bytes, please minimize large stack variables. Estimated function frame size: 7680 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
+Error: Function _ZN4clmm9__private8__global18increase_liquidity17h386a0ddf4d1a57edE Stack offset of 7424 exceeded max offset of 4096 by 3328 bytes, please minimize large stack variables. Estimated function frame size: 7488 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
 
 Error: A function call in method _ZN4clmm9__private8__global18increase_liquidity17h386a0ddf4d1a57edE overwrites values in the frame. Please, decrease stack usage or remove parameters from the call. The function call may cause undefined behavior during execution.
 
 Error: A function call in method _ZN4clmm9__private8__global18increase_liquidity17h386a0ddf4d1a57edE overwrites values in the frame. Please, decrease stack usage or remove parameters from the call. The function call may cause undefined behavior during execution.
 
-Error: Function _ZN4clmm9__private8__global18decrease_liquidity17h665feb2a1d6705dfE Stack offset of 7616 exceeded max offset of 4096 by 3520 bytes, please minimize large stack variables. Estimated function frame size: 7680 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
+Error: Function _ZN4clmm9__private8__global18decrease_liquidity17h665feb2a1d6705dfE Stack offset of 7424 exceeded max offset of 4096 by 3328 bytes, please minimize large stack variables. Estimated function frame size: 7488 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
 
 Error: A function call in method _ZN4clmm9__private8__global18decrease_liquidity17h665feb2a1d6705dfE overwrites values in the frame. Please, decrease stack usage or remove parameters from the call. The function call may cause undefined behavior during execution.
 
@@ -28,9 +28,9 @@ Error: A function call in method _ZN4clmm9__private8__global18decrease_liquidity
 
 Error: Function _ZN4clmm9__private8__global4swap17h88b008cbd9b57a53E Stack offset of 4520 exceeded max offset of 4096 by 424 bytes, please minimize large stack variables. Estimated function frame size: 4544 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
 
-Error: Function _ZN91_$LT$clmm..OpenPosition$u20$as$u20$anchor_lang..Accounts$LT$clmm..OpenPositionBumps$GT$$GT$12try_accounts17h167d2e4cafaac66eE Stack offset of 5720 exceeded max offset of 4096 by 1624 bytes, please minimize large stack variables. Estimated function frame size: 7040 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
+Error: Function _ZN91_$LT$clmm..OpenPosition$u20$as$u20$anchor_lang..Accounts$LT$clmm..OpenPositionBumps$GT$$GT$12try_accounts17h167d2e4cafaac66eE Stack offset of 5624 exceeded max offset of 4096 by 1528 bytes, please minimize large stack variables. Estimated function frame size: 6976 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
 
-Error: Function _ZN101_$LT$clmm..IncreaseLiquidity$u20$as$u20$anchor_lang..Accounts$LT$clmm..IncreaseLiquidityBumps$GT$$GT$12try_accounts17h249bafe2e8075ef1E Stack offset of 4320 exceeded max offset of 4096 by 224 bytes, please minimize large stack variables. Estimated function frame size: 6656 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
+Error: Function _ZN101_$LT$clmm..IncreaseLiquidity$u20$as$u20$anchor_lang..Accounts$LT$clmm..IncreaseLiquidityBumps$GT$$GT$12try_accounts17h249bafe2e8075ef1E Stack offset of 4136 exceeded max offset of 4096 by 40 bytes, please minimize large stack variables. Estimated function frame size: 6528 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
 
-Error: Function _ZN101_$LT$clmm..DecreaseLiquidity$u20$as$u20$anchor_lang..Accounts$LT$clmm..DecreaseLiquidityBumps$GT$$GT$12try_accounts17hef911209dbb66ddfE Stack offset of 4320 exceeded max offset of 4096 by 224 bytes, please minimize large stack variables. Estimated function frame size: 6656 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
+Error: Function _ZN101_$LT$clmm..DecreaseLiquidity$u20$as$u20$anchor_lang..Accounts$LT$clmm..DecreaseLiquidityBumps$GT$$GT$12try_accounts17hef911209dbb66ddfE Stack offset of 4136 exceeded max offset of 4096 by 40 bytes, please minimize large stack variables. Estimated function frame size: 6528 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
 

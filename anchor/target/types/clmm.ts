@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/clmm.json`.
  */
 export type Clmm = {
-  "address": "2T8KvHs6Q881FpnC2BZc7g9G5jpHw5ujdcZLHmLfSZLr",
+  "address": "88KQMA65EwtZwyFCF16mAMZgNPjdcQCSwr2PXnMsKFEZ",
   "metadata": {
     "name": "clmm",
     "version": "0.1.0",
@@ -44,7 +44,8 @@ export type Clmm = {
           "writable": true
         },
         {
-          "name": "position"
+          "name": "position",
+          "writable": true
         },
         {
           "name": "userToken0",
@@ -128,7 +129,8 @@ export type Clmm = {
           "writable": true
         },
         {
-          "name": "position"
+          "name": "position",
+          "writable": true
         },
         {
           "name": "userToken0",
