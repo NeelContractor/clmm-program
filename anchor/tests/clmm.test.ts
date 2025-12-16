@@ -184,6 +184,8 @@ describe('Clmm', () => {
       userTokenAccount1
     );
 
+    console.log("lowerTickArrayPda: ", lowerTickArrayPda)
+    console.log("upperTickArrayPda: ", upperTickArrayPda)
     console.log("Position :", positionPda.toBase58());
 
     const tx = await program.methods
@@ -226,12 +228,14 @@ describe('Clmm', () => {
     const poolAccount = await program.account.pool.fetch(poolPDA);
     expect(poolAccount.globalLiquidity.toString()).toEqual(LIQUIDITY_AMOUNT.toString());
 
-    // Verify tokens were transferred
+    // Verify tokens were transferred (with simplified calculation: liquidity/1000)
     const userToken0After = await getAccount(provider.connection, userTokenAccount0);
     const userToken1After = await getAccount(provider.connection, userTokenAccount1);
 
-    expect(Number(userToken0After.amount)).toBeLessThan(Number(userToken0Before.amount));
-    expect(Number(userToken1After.amount)).toBeLessThan(Number(userToken1Before.amount));
+    const expectedAmount = LIQUIDITY_AMOUNT.toNumber() / 1000;
+    
+    expect(Number(userToken0After.amount)).toEqual(Number(userToken0Before.amount) - expectedAmount);
+    expect(Number(userToken1After.amount)).toEqual(Number(userToken1Before.amount) - expectedAmount);
   })
 
   it('Increase Liquidity', async () => {
@@ -242,7 +246,7 @@ describe('Clmm', () => {
     const positionBefore = await program.account.position.fetch(positionPda);
 
     const tx = await program.methods
-      .increaseLiquidity(LOWER_TICK, UPPER_TICK, additionalLiquidity)
+      .increaseLiquidity(additionalLiquidity)
       .accountsStrict({
         pool: poolPDA,
         lowerTickArray: lowerTickArrayPda,
@@ -279,23 +283,18 @@ describe('Clmm', () => {
     const userToken0After = await getAccount(provider.connection, userTokenAccount0);
     const userToken1After = await getAccount(provider.connection, userTokenAccount1);
 
-    expect(Number(userToken0After.amount)).toBeLessThan(Number(userToken0Before.amount));
-    expect(Number(userToken1After.amount)).toBeLessThan(Number(userToken1Before.amount));
+    const expectedAmount = additionalLiquidity.toNumber() / 1000;
+
+    expect(Number(userToken0After.amount)).toEqual(Number(userToken0Before.amount) - expectedAmount);
+    expect(Number(userToken1After.amount)).toEqual(Number(userToken1Before.amount) - expectedAmount);
   })
 
   it('Swap token 0 for token 1', async () => {
-    const amountIn = new BN(1000);
-    const amountOutMinimum = new BN(900);
+    // Use a smaller amount that the pool can handle
+    // Pool has 150 tokens of each (100 + 50 from liquidity)
+    const amountIn = new BN(50);
+    const amountOutMinimum = new BN(45);
     const swapToken0For1 = true;
-
-    const [currentTickArrayPda] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("tick_array"),
-        poolPDA.toBuffer(),
-        i32ToLeBytes(getTickArrayStartIndex(0, TICK_SPACING)),
-      ],
-      program.programId
-    );
 
     const userToken0Before = await getAccount(provider.connection, userTokenAccount0);
     const userToken1Before = await getAccount(provider.connection, userTokenAccount1);
@@ -309,7 +308,6 @@ describe('Clmm', () => {
         userToken1: userTokenAccount1,
         poolToken0: tokenVault0Keypair.publicKey,
         poolToken1: tokenVault1Keypair.publicKey,
-        tickArray: currentTickArrayPda,
         payer: payer.publicKey,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -323,27 +321,23 @@ describe('Clmm', () => {
     const userToken0After = await getAccount(provider.connection, userTokenAccount0);
     const userToken1After = await getAccount(provider.connection, userTokenAccount1);
 
+    // With 0.1% fee: output = input - input/1000
+    const expectedOutput = amountIn.toNumber() - Math.floor(amountIn.toNumber() / 1000);
+
     expect(Number(userToken0After.amount)).toEqual(Number(userToken0Before.amount) - amountIn.toNumber());
-    expect(Number(userToken1After.amount)).toBeGreaterThan(Number(userToken1Before.amount));
+    expect(Number(userToken1After.amount)).toEqual(Number(userToken1Before.amount) + expectedOutput);
 
     // Verify pool price changed
     const poolAfter = await program.account.pool.fetch(poolPDA);
     expect(poolAfter.sqrtPriceX96.toString()).not.toEqual(poolBefore.sqrtPriceX96.toString());
+    console.log("Price before:", poolBefore.sqrtPriceX96.toString());
+    console.log("Price after:", poolAfter.sqrtPriceX96.toString());
   })
 
   it('Swap token 1 for token 0', async () => {
-    const amountIn = new BN(1000);
-    const amountOutMinimum = new BN(900);
+    const amountIn = new BN(50);
+    const amountOutMinimum = new BN(45);
     const swapToken0For1 = false;
-
-    const [currentTickArrayPda] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("tick_array"),
-        poolPDA.toBuffer(),
-        i32ToLeBytes(getTickArrayStartIndex(0, TICK_SPACING)),
-      ],
-      program.programId
-    );
 
     const userToken0Before = await getAccount(provider.connection, userTokenAccount0);
     const userToken1Before = await getAccount(provider.connection, userTokenAccount1);
@@ -356,7 +350,6 @@ describe('Clmm', () => {
         userToken1: userTokenAccount1,
         poolToken0: tokenVault0Keypair.publicKey,
         poolToken1: tokenVault1Keypair.publicKey,
-        tickArray: currentTickArrayPda,
         payer: payer.publicKey,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -370,8 +363,10 @@ describe('Clmm', () => {
     const userToken0After = await getAccount(provider.connection, userTokenAccount0);
     const userToken1After = await getAccount(provider.connection, userTokenAccount1);
 
+    const expectedOutput = amountIn.toNumber() - Math.floor(amountIn.toNumber() / 1000);
+
     expect(Number(userToken1After.amount)).toEqual(Number(userToken1Before.amount) - amountIn.toNumber());
-    expect(Number(userToken0After.amount)).toBeGreaterThan(Number(userToken0Before.amount));
+    expect(Number(userToken0After.amount)).toEqual(Number(userToken0Before.amount) + expectedOutput);
   })
 
   it('Decrease Liquidity', async () => {
@@ -383,7 +378,7 @@ describe('Clmm', () => {
     const poolBefore = await program.account.pool.fetch(poolPDA);
 
     const tx = await program.methods
-      .decreaseLiquidity(LOWER_TICK, UPPER_TICK, liquidityToRemove)
+      .decreaseLiquidity(liquidityToRemove)
       .accountsStrict({
         payer: payer.publicKey,
         pool: poolPDA,
@@ -420,23 +415,16 @@ describe('Clmm', () => {
     const userToken0After = await getAccount(provider.connection, userTokenAccount0);
     const userToken1After = await getAccount(provider.connection, userTokenAccount1);
 
-    expect(Number(userToken0After.amount)).toBeGreaterThan(Number(userToken0Before.amount));
-    expect(Number(userToken1After.amount)).toBeGreaterThan(Number(userToken1Before.amount));
+    const expectedAmount = liquidityToRemove.toNumber() / 1000;
+
+    expect(Number(userToken0After.amount)).toEqual(Number(userToken0Before.amount) + expectedAmount);
+    expect(Number(userToken1After.amount)).toEqual(Number(userToken1Before.amount) + expectedAmount);
   })
 
   it('Fails to swap with insufficient liquidity', async () => {
     const amountIn = new BN(100000000000); // Very large amount
     const amountOutMinimum = new BN(1);
     const swapToken0For1 = true;
-
-    const [currentTickArrayPda] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("tick_array"),
-        poolPDA.toBuffer(),
-        i32ToLeBytes(getTickArrayStartIndex(0, TICK_SPACING)),
-      ],
-      program.programId
-    );
 
     try {
       await program.methods
@@ -447,7 +435,6 @@ describe('Clmm', () => {
           userToken1: userTokenAccount1,
           poolToken0: tokenVault0Keypair.publicKey,
           poolToken1: tokenVault1Keypair.publicKey,
-          tickArray: currentTickArrayPda,
           payer: payer.publicKey,
           systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
@@ -459,6 +446,7 @@ describe('Clmm', () => {
       expect(true).toBe(false);
     } catch (error) {
       // Expected to fail due to insufficient tokens
+      console.log("Expected error:", error.message || error);
       expect(error).toBeDefined();
     }
   })
@@ -531,6 +519,7 @@ describe('Clmm', () => {
       expect(true).toBe(false);
     } catch (error) {
       // Expected to fail
+      console.log("Expected error:", error.message || error);
       expect(error).toBeDefined();
     }
   })

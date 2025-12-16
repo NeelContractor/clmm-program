@@ -90,15 +90,7 @@ export type Clmm = {
       ],
       "args": [
         {
-          "name": "lowerTick",
-          "type": "i32"
-        },
-        {
-          "name": "upperTick",
-          "type": "i32"
-        },
-        {
-          "name": "liquidtyAmount",
+          "name": "liquidityAmount",
           "type": "u128"
         }
       ]
@@ -180,15 +172,7 @@ export type Clmm = {
       ],
       "args": [
         {
-          "name": "lowerTick",
-          "type": "i32"
-        },
-        {
-          "name": "upperTick",
-          "type": "i32"
-        },
-        {
-          "name": "liquidtyAmount",
+          "name": "liquidityAmount",
           "type": "u128"
         }
       ]
@@ -241,12 +225,10 @@ export type Clmm = {
           }
         },
         {
-          "name": "tokenMint0",
-          "writable": true
+          "name": "tokenMint0"
         },
         {
-          "name": "tokenMint1",
-          "writable": true
+          "name": "tokenMint1"
         },
         {
           "name": "tokenVault0",
@@ -458,7 +440,7 @@ export type Clmm = {
           "type": "i32"
         },
         {
-          "name": "liquidtyAmount",
+          "name": "liquidityAmount",
           "type": "u128"
         },
         {
@@ -502,10 +484,6 @@ export type Clmm = {
         },
         {
           "name": "poolToken1",
-          "writable": true
-        },
-        {
-          "name": "tickArray",
           "writable": true
         },
         {
@@ -617,88 +595,48 @@ export type Clmm = {
     },
     {
       "code": 6006,
-      "name": "invalidPrice",
-      "msg": "Invalid Price"
-    },
-    {
-      "code": 6007,
       "name": "invalidPositionOwner",
       "msg": "Invalid Position Owner"
     },
     {
-      "code": 6008,
+      "code": 6007,
       "name": "invalidPositionRange",
       "msg": "Invalid Position Range"
     },
     {
-      "code": 6009,
-      "name": "tickNotFound",
-      "msg": "Tick Not Found"
-    },
-    {
-      "code": 6010,
-      "name": "token0TransferFailed",
-      "msg": "Token 0 Transfer Failed"
-    },
-    {
-      "code": 6011,
-      "name": "token1TransferFailed",
-      "msg": "Token 1 Transfer Failed"
-    },
-    {
-      "code": 6012,
-      "name": "invalidBump",
-      "msg": "Invalid Bump"
-    },
-    {
-      "code": 6013,
-      "name": "invalidTickArrayAccount",
-      "msg": "Invalid Tick Array Account"
-    },
-    {
-      "code": 6014,
+      "code": 6008,
       "name": "invalidTokenPair",
       "msg": "Invalid Token Pair"
     },
     {
-      "code": 6015,
+      "code": 6009,
       "name": "mintRangeMustCoverCurrentPrice",
       "msg": "Mint Range Must Cover Current Price"
     },
     {
-      "code": 6016,
+      "code": 6010,
       "name": "burnRangeMustCoverCurrentPrice",
       "msg": "Burn Range Must Cover Current Price"
     },
     {
-      "code": 6017,
+      "code": 6011,
       "name": "insufficientPoolLiquidity",
       "msg": "Insufficient Pool Liquidity"
     },
     {
-      "code": 6018,
-      "name": "invalidPoolLiquidity",
-      "msg": "Invalid Pool Liquidity"
-    },
-    {
-      "code": 6019,
+      "code": 6012,
       "name": "noLiquidityToRemove",
       "msg": "No Liquidity To Remove"
     },
     {
-      "code": 6020,
-      "name": "invalidTickArrayStartIndex",
-      "msg": "Invalid Tick Array Start Index"
+      "code": 6013,
+      "name": "tickNotFound",
+      "msg": "Tick Not Found"
     },
     {
-      "code": 6021,
-      "name": "invalidTickArrayBump",
-      "msg": "Invalid Tick Array Bump"
-    },
-    {
-      "code": 6022,
-      "name": "invalidTickArrayPool",
-      "msg": "Invalid Tick Array Pool"
+      "code": 6014,
+      "name": "invalidTickArrayIndex",
+      "msg": "Invalid Tick Array Index"
     }
   ],
   "types": [
@@ -780,6 +718,10 @@ export type Clmm = {
     },
     {
       "name": "tickArray",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
       "type": {
         "kind": "struct",
         "fields": [
@@ -790,6 +732,19 @@ export type Clmm = {
           {
             "name": "startingTick",
             "type": "i32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
+            }
           },
           {
             "name": "ticks",
@@ -803,30 +758,38 @@ export type Clmm = {
                 30
               ]
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
     },
     {
       "name": "tickInfo",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
       "type": {
         "kind": "struct",
         "fields": [
           {
+            "name": "liquidityGrossLower",
+            "type": "u64"
+          },
+          {
+            "name": "liquidityGrossUpper",
+            "type": "u64"
+          },
+          {
+            "name": "liquidityNetLower",
+            "type": "u64"
+          },
+          {
+            "name": "liquidityNetUpper",
+            "type": "u64"
+          },
+          {
             "name": "initialized",
-            "type": "bool"
-          },
-          {
-            "name": "liquidityGross",
-            "type": "u128"
-          },
-          {
-            "name": "liquidityNet",
-            "type": "i128"
+            "type": "u64"
           }
         ]
       }

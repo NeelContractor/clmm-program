@@ -84,15 +84,7 @@
       ],
       "args": [
         {
-          "name": "lower_tick",
-          "type": "i32"
-        },
-        {
-          "name": "upper_tick",
-          "type": "i32"
-        },
-        {
-          "name": "liquidty_amount",
+          "name": "liquidity_amount",
           "type": "u128"
         }
       ]
@@ -174,15 +166,7 @@
       ],
       "args": [
         {
-          "name": "lower_tick",
-          "type": "i32"
-        },
-        {
-          "name": "upper_tick",
-          "type": "i32"
-        },
-        {
-          "name": "liquidty_amount",
+          "name": "liquidity_amount",
           "type": "u128"
         }
       ]
@@ -235,12 +219,10 @@
           }
         },
         {
-          "name": "token_mint_0",
-          "writable": true
+          "name": "token_mint_0"
         },
         {
-          "name": "token_mint_1",
-          "writable": true
+          "name": "token_mint_1"
         },
         {
           "name": "token_vault_0",
@@ -452,7 +434,7 @@
           "type": "i32"
         },
         {
-          "name": "liquidty_amount",
+          "name": "liquidity_amount",
           "type": "u128"
         },
         {
@@ -496,10 +478,6 @@
         },
         {
           "name": "pool_token_1",
-          "writable": true
-        },
-        {
-          "name": "tick_array",
           "writable": true
         },
         {
@@ -611,88 +589,48 @@
     },
     {
       "code": 6006,
-      "name": "InvalidPrice",
-      "msg": "Invalid Price"
-    },
-    {
-      "code": 6007,
       "name": "InvalidPositionOwner",
       "msg": "Invalid Position Owner"
     },
     {
-      "code": 6008,
+      "code": 6007,
       "name": "InvalidPositionRange",
       "msg": "Invalid Position Range"
     },
     {
-      "code": 6009,
-      "name": "TickNotFound",
-      "msg": "Tick Not Found"
-    },
-    {
-      "code": 6010,
-      "name": "Token0TransferFailed",
-      "msg": "Token 0 Transfer Failed"
-    },
-    {
-      "code": 6011,
-      "name": "Token1TransferFailed",
-      "msg": "Token 1 Transfer Failed"
-    },
-    {
-      "code": 6012,
-      "name": "InvalidBump",
-      "msg": "Invalid Bump"
-    },
-    {
-      "code": 6013,
-      "name": "InvalidTickArrayAccount",
-      "msg": "Invalid Tick Array Account"
-    },
-    {
-      "code": 6014,
+      "code": 6008,
       "name": "InvalidTokenPair",
       "msg": "Invalid Token Pair"
     },
     {
-      "code": 6015,
+      "code": 6009,
       "name": "MintRangeMustCoverCurrentPrice",
       "msg": "Mint Range Must Cover Current Price"
     },
     {
-      "code": 6016,
+      "code": 6010,
       "name": "BurnRangeMustCoverCurrentPrice",
       "msg": "Burn Range Must Cover Current Price"
     },
     {
-      "code": 6017,
+      "code": 6011,
       "name": "InsufficientPoolLiquidity",
       "msg": "Insufficient Pool Liquidity"
     },
     {
-      "code": 6018,
-      "name": "InvalidPoolLiquidity",
-      "msg": "Invalid Pool Liquidity"
-    },
-    {
-      "code": 6019,
+      "code": 6012,
       "name": "NoLiquidityToRemove",
       "msg": "No Liquidity To Remove"
     },
     {
-      "code": 6020,
-      "name": "InvalidTickArrayStartIndex",
-      "msg": "Invalid Tick Array Start Index"
+      "code": 6013,
+      "name": "TickNotFound",
+      "msg": "Tick Not Found"
     },
     {
-      "code": 6021,
-      "name": "InvalidTickArrayBump",
-      "msg": "Invalid Tick Array Bump"
-    },
-    {
-      "code": 6022,
-      "name": "InvalidTickArrayPool",
-      "msg": "Invalid Tick Array Pool"
+      "code": 6014,
+      "name": "InvalidTickArrayIndex",
+      "msg": "Invalid Tick Array Index"
     }
   ],
   "types": [
@@ -774,6 +712,10 @@
     },
     {
       "name": "TickArray",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
       "type": {
         "kind": "struct",
         "fields": [
@@ -784,6 +726,19 @@
           {
             "name": "starting_tick",
             "type": "i32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "_padding",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
+            }
           },
           {
             "name": "ticks",
@@ -797,30 +752,38 @@
                 30
               ]
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
     },
     {
       "name": "TickInfo",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
       "type": {
         "kind": "struct",
         "fields": [
           {
+            "name": "liquidity_gross_lower",
+            "type": "u64"
+          },
+          {
+            "name": "liquidity_gross_upper",
+            "type": "u64"
+          },
+          {
+            "name": "liquidity_net_lower",
+            "type": "u64"
+          },
+          {
+            "name": "liquidity_net_upper",
+            "type": "u64"
+          },
+          {
             "name": "initialized",
-            "type": "bool"
-          },
-          {
-            "name": "liquidity_gross",
-            "type": "u128"
-          },
-          {
-            "name": "liquidity_net",
-            "type": "i128"
+            "type": "u64"
           }
         ]
       }
