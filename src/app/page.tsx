@@ -1,5 +1,5 @@
-import { DashboardFeature } from '@/components/dashboard/dashboard-feature'
+import Clmm from '@/components/clmm/Clmm'
 
 export default function Home() {
-  return <DashboardFeature />
+  return <Clmm />
 }
