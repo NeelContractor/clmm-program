@@ -7,10 +7,9 @@ import { BN } from "bn.js";
 import { useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const ADMIN_PUBKEY = new PublicKey("GToMxgF4JcNn8dmNiHt2JrrvLaW6S1zSPoL2W8K2Wkmi");
-
-// TODO: probably change input logic to shadcn input/ selector
 
 export default function Clmm() {
     const { publicKey } = useWallet();
@@ -25,7 +24,8 @@ export default function Clmm() {
         tickArrayAccounts 
     } = useClmmProgram();
     
-    const [activeTab, setActiveTab] = useState<'pools' | 'positions' | 'swap' | 'create'>('pools'); // TODO: add logic to show create tab only if the publicKey.equals(ADMIN_PUBKEY)
+    const isAdmin = publicKey?.equals(ADMIN_PUBKEY);
+    const [activeTab, setActiveTab] = useState<'pools' | 'positions' | 'swap' | 'create'>('pools'); 
     
     const [initPoolForm, setInitPoolForm] = useState({
         tokenMint0: '',
@@ -222,7 +222,7 @@ export default function Clmm() {
                     </div>
                     
                     <div className="flex flex-wrap justify-center gap-3 items-center">
-                        {publicKey.equals(ADMIN_PUBKEY) && (
+                        {isAdmin && (
                             <Link href="/create" className="px-5 py-2.5 bg-red-500 hover:bg-red-600 rounded-xl font-semibold transition-all border-2 border-red-500 hover:border-red-400 text-white">
                                 CREATE MINT
                             </Link>
@@ -289,7 +289,7 @@ export default function Clmm() {
 
                 {/* Tabs */}
                 <div className="flex flex-wrap gap-3 mb-8 bg-zinc-900 border-2 border-white p-2 rounded-2xl">
-                    {(['pools', 'positions', 'swap', 'create'] as const).map((tab) => (
+                    {(['pools', 'positions', 'swap', ...(isAdmin ? ['create' as const] : [])] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -371,6 +371,89 @@ export default function Clmm() {
                 {/* Positions Tab */}
                 {activeTab === 'positions' && (
                     <div className="space-y-6">
+
+                        {/* Open New Position Form */}
+                        <div className="bg-zinc-900 border-2 border-green-500 rounded-2xl p-6">
+                            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-green-500">
+                                <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center border-2 border-green-500">
+                                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </div>
+                                OPEN NEW POSITION
+                            </h2>
+                            <form onSubmit={handleOpenPosition} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">POOL ADDRESS</label>
+                                    <Select
+                                        value={openPosForm.poolAddress}
+                                        onValueChange={(value) =>
+                                            setOpenPosForm({ ...openPosForm, poolAddress: value })
+                                        }
+                                        required
+                                        >
+                                        <SelectTrigger className="w-full bg-black border-2 border-white rounded-lg px-4 py-6 text-white focus:border-green-500">
+                                            <SelectValue placeholder="Select a pool" />
+                                        </SelectTrigger>
+
+                                        <SelectContent className="bg-black border border-white text-white">
+                                            {poolAccounts.data?.map((pool) => {
+                                            const pubkey = pool.publicKey.toString();
+
+                                            return (
+                                                <SelectItem key={pubkey} value={pubkey}>
+                                                {pubkey}
+                                                </SelectItem>
+                                            );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">LOWER TICK</label>
+                                        <input
+                                            type="number"
+                                            value={openPosForm.lowerTick}
+                                            onChange={(e) => setOpenPosForm({ ...openPosForm, lowerTick: e.target.value })}
+                                            className="w-full bg-black border-2 border-white rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-green-500 transition-all"
+                                            placeholder="-100"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">UPPER TICK</label>
+                                        <input
+                                            type="number"
+                                            value={openPosForm.upperTick}
+                                            onChange={(e) => setOpenPosForm({ ...openPosForm, upperTick: e.target.value })}
+                                            className="w-full bg-black border-2 border-white rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-green-500 transition-all"
+                                            placeholder="100"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">LIQUIDITY AMOUNT</label>
+                                    <input
+                                        type="number"
+                                        value={openPosForm.liquidityAmount}
+                                        onChange={(e) => setOpenPosForm({ ...openPosForm, liquidityAmount: e.target.value })}
+                                        className="w-full bg-black border-2 border-white rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-green-500 transition-all"
+                                        placeholder="1000000"
+                                        required
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={openPositionHandler.isPending}
+                                    className="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-lg"
+                                >
+                                    {openPositionHandler.isPending ? 'OPENING...' : 'OPEN POSITION'}
+                                </button>
+                            </form>
+                        </div>
+
                         <div className="bg-zinc-900 border-2 border-white rounded-2xl p-6">
                             <h2 className="text-2xl font-bold mb-4">YOUR POSITIONS</h2>
                             {positionAccounts.isLoading ? (
@@ -507,19 +590,29 @@ export default function Clmm() {
                             <form onSubmit={handleSwap} className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-400 mb-2">POOL ADDRESS</label>
-                                    <select
+                                    <Select
                                         value={swapForm.poolAddress}
-                                        onChange={(e) => setSwapForm({ ...swapForm, poolAddress: e.target.value })}
-                                        className="w-full bg-black border-2 border-white rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-green-500 transition-all"
+                                        onValueChange={(value) =>
+                                            setSwapForm({ ...swapForm, poolAddress: value })
+                                        }
                                         required
-                                    >
-                                        <option value="">Select pool</option>
-                                        {poolAccounts.data?.map((pool) => ( 
-                                            <option key={pool.publicKey.toString()} value={pool.publicKey.toString()}>
-                                                {pool.publicKey.toString().slice(0, 8)}...{pool.publicKey.toString().slice(-8)}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        >
+                                        <SelectTrigger className="w-full bg-black border-2 border-white rounded-lg px-4 py-6 text-white focus:border-green-500">
+                                            <SelectValue placeholder="Select pool" />
+                                        </SelectTrigger>
+
+                                        <SelectContent className="bg-black border border-white text-white">
+                                            {poolAccounts.data?.map((pool) => {
+                                            const pubkey = pool.publicKey.toString();
+
+                                            return (
+                                                <SelectItem key={pubkey} value={pubkey}>
+                                                {pubkey}
+                                                </SelectItem>
+                                            );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-400 mb-2">AMOUNT IN</label>
@@ -583,7 +676,7 @@ export default function Clmm() {
                 )}
 
                 {/* Create Tab */}
-                {activeTab === 'create' && (
+                {activeTab === 'create' && isAdmin && (
                     <div className="grid md:grid-cols-2 gap-6">
                         {/* Initialize Pool */}
                         <div className="bg-zinc-900 border-2 border-white rounded-2xl p-6">
@@ -627,7 +720,7 @@ export default function Clmm() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-400 mb-2">INITIAL SQRT PRICE</label>
                                     <input
-                                        type="text" // TODO: change this to number so the input takes number only and then convert it to string
+                                        type="number" 
                                         value={initPoolForm.initialSqrtPrice}
                                         onChange={(e) => setInitPoolForm({ ...initPoolForm, initialSqrtPrice: e.target.value })}
                                         className="w-full bg-black border-2 border-white rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-green-500 transition-all"
@@ -638,7 +731,7 @@ export default function Clmm() {
                                 <button
                                     type="submit"
                                     disabled={initializePoolHandler.isPending}
-                                    className="w-full bg-gradient-to-r bg-green-500 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                    className="w-full bg-green-500 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                                 >
                                     {initializePoolHandler.isPending ? 'CREATING...' : 'CREATE POOL'}
                                 </button>
@@ -653,19 +746,29 @@ export default function Clmm() {
                             <form onSubmit={handleOpenPosition} className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-400 mb-2">POOL ADDRESS</label>
-                                    <select
+                                    <Select
                                         value={openPosForm.poolAddress}
-                                        onChange={(e) => setOpenPosForm({ ...openPosForm, poolAddress: e.target.value })}
-                                        className="w-full bg-black border-2 border-white rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-green-500 transition-all"
+                                        onValueChange={(value) =>
+                                            setOpenPosForm({ ...openPosForm, poolAddress: value })
+                                        }
                                         required
-                                    >
-                                        <option value="">Select a pool</option>
-                                        {poolAccounts.data?.map((pool) => (
-                                            <option key={pool.publicKey.toString()} value={pool.publicKey.toString()}>
-                                                {pool.publicKey.toString().slice(0, 8)}...{pool.publicKey.toString().slice(-8)}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        >
+                                        <SelectTrigger className="w-full bg-black border-2 border-white rounded-lg px-4 py-6 text-white focus:border-green-500">
+                                            <SelectValue placeholder="Select a pool" />
+                                        </SelectTrigger>
+
+                                        <SelectContent className="bg-black border border-white text-white">
+                                            {poolAccounts.data?.map((pool) => {
+                                            const pubkey = pool.publicKey.toString();
+
+                                            return (
+                                                <SelectItem key={pubkey} value={pubkey}>
+                                                {pubkey}
+                                                </SelectItem>
+                                            );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -705,7 +808,7 @@ export default function Clmm() {
                                 <button
                                     type="submit"
                                     disabled={openPositionHandler.isPending}
-                                    className="w-full bg-gradient-to-r bg-green-500 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                    className="w-full bg-green-500 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                                 >
                                     {openPositionHandler.isPending ? 'OPENING...' : 'OPEN POSITION'}
                                 </button>

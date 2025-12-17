@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { PublicKey, Transaction } from '@solana/web3.js';
+import { Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { 
   createMintToInstruction,
   getAssociatedTokenAddress,
@@ -9,18 +9,31 @@ import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getMint,
-  getAccount
+  getAccount,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+  initializeMint2InstructionData,
+  initializeMintInstructionData,
+  createInitializeMint2Instruction
 } from '@solana/spl-token';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletButton } from '@/components/solana/solana-provider';
 import Link from 'next/link';
+import bs58 from "bs58";
+// import dotenv from "dotenv";
+// dotenv.config();
 
-const ADMIN_PUBKEY = new PublicKey("GToMxgF4JcNn8dmNiHt2JrrvLaW6S1zSPoL2W8K2Wkmi");
+// const MINT_AUTHORITY = new PublicKey("GToMxgF4JcNn8dmNiHt2JrrvLaW6S1zSPoL2W8K2Wkmi");
+// TODO: Add logic to other users to mint tokens
 
 const TokenMinter = () => {
-  const { publicKey, signTransaction } = useWallet();
+  const { publicKey, signTransaction, wallet } = useWallet();
   const { connection } = useConnection();
 
+  let key = Uint8Array.from(JSON.parse(process.env.NEXT_PUBLIC_MINT_AUTHORITY_KEYPAIR!))
+  const MINT_AUTHORITY = Keypair.fromSecretKey(key);
+
+  // console.log("MINT_AUTHORITY: ", MINT_AUTHORITY.publicKey.toBase58());
   // Predefined devnet tokens
   const DEVNET_TOKENS = [
     {
@@ -95,14 +108,12 @@ const TokenMinter = () => {
           const mintInfo = await getMint(connection, mintAddress);
           
           // Only include tokens where user is mint authority
-          if (mintInfo.mintAuthority?.toString() === publicKey.toString()) {
             tokens.push({
               mint: mintAddress.toString(),
               decimals: mintInfo.decimals,
               balance: parsedInfo.tokenAmount.uiAmount,
               supply: Number(mintInfo.supply) / Math.pow(10, mintInfo.decimals)
             });
-          }
         } catch (e) {
           // Skip tokens we can't fetch
           continue;
@@ -221,18 +232,13 @@ const TokenMinter = () => {
       const mintPubkey = new PublicKey(tokenMint);
       const recipientPubkey = new PublicKey(recipientAddress);
 
-      // Check if user is mint authority
-      if (tokenInfo.mintAuthority !== publicKey.toString()) {
-        throw new Error(`You are not the mint authority. Mint authority: ${tokenInfo.mintAuthority}`);
-      }
-
       // Get recipient's associated token account
       const recipientATA = await getAssociatedTokenAddress(
         mintPubkey,
         recipientPubkey,
-        false,
-        TOKEN_PROGRAM_ID,
-        ASSOCIATED_TOKEN_PROGRAM_ID
+        // false,
+        // TOKEN_PROGRAM_ID,
+        // ASSOCIATED_TOKEN_PROGRAM_ID
       );
 
       const transaction = new Transaction();
@@ -262,38 +268,73 @@ const TokenMinter = () => {
         parseFloat(mintAmount) * Math.pow(10, tokenInfo.decimals)
       );
 
-      transaction.add(
-        createMintToInstruction(
-          mintPubkey,
-          recipientATA,
-          publicKey, // mint authority
-          mintAmountRaw,
-          [],
-          TOKEN_PROGRAM_ID
-        )
-      );
+      const recipientAssociatedTokenAccount = await getOrCreateAssociatedTokenAccount(
+        connection, MINT_AUTHORITY, mintPubkey, publicKey
+      )
 
-      // Get recent blockhash
-      setStatus('Getting recent blockhash...');
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = publicKey;
+      // const recipientAssociatedTokenAccount = await getAssociatedTokenAddress(
+      //   mintPubkey,
+      //   publicKey
+      // );
 
-      // Sign transaction
-      setStatus('Signing transaction...');
-      const signed = await signTransaction(transaction);
+    const transactionSignature = await mintTo(
+        connection,
+        MINT_AUTHORITY,
+        mintPubkey,
+        recipientAssociatedTokenAccount.address,
+        MINT_AUTHORITY,
+        mintAmountRaw
+    )
 
-      // Send transaction
-      setStatus('Sending transaction...');
-      const signature = await connection.sendRawTransaction(signed.serialize());
+    // const link = getExplorerLink("transaction", transactionSignature, "devnet");
+    console.log(transactionSignature);
+
+      // const tx = await fetch("/api/mint", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     mint: mintPubkey.toBase58(),         
+      //     destination: recipientATA.toBase58(),
+      //     amount: mintAmountRaw.toString(),    
+      //   }),
+      // });
+
+      // console.log("tx: ", tx);
+
+      // transaction.add(
+      //   createMintToInstruction(
+      //     mintPubkey,
+      //     recipientATA,
+      //     MINT_AUTHORITY.publicKey,
+      //     mintAmountRaw,
+      //     [],
+      //     TOKEN_PROGRAM_ID
+      //   )
+      // );
+
+      // // Get recent blockhash
+      // setStatus('Getting recent blockhash...');
+      // const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+      // transaction.recentBlockhash = blockhash;
+      // transaction.feePayer = publicKey;
+
+      // // Sign transaction
+      // setStatus('Signing transaction...');
+      // const signed = await signTransaction(transaction);
+
+      // // Send transaction
+      // setStatus('Sending transaction...');
+      // const signature = await connection.sendRawTransaction(signed.serialize()); // TODO: failing because of MINT_AUHTORITY didnt sign the txn
 
       // Confirm transaction
-      setStatus('Confirming transaction...');
-      await connection.confirmTransaction({
-        signature,
-        blockhash,
-        lastValidBlockHeight
-      });
+      // setStatus('Confirming transaction...');
+      // await connection.confirmTransaction({
+      //   signature,
+      //   blockhash,
+      //   lastValidBlockHeight
+      // });
 
       setStatus(`✅ Successfully minted ${mintAmount} tokens!`);
       setError('');
@@ -458,14 +499,6 @@ const TokenMinter = () => {
               </div>
 
               {/* Authority Check */}
-              {publicKey && tokenInfo.mintAuthority !== publicKey.toString() && (
-                <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded">
-                  <p className="text-sm font-semibold text-red-500">
-                    ⚠️ You are NOT the mint authority for this token. You cannot mint tokens.
-                  </p>
-                </div>
-              )}
-
               {publicKey && tokenInfo.mintAuthority === publicKey.toString() && (
                 <div className="mt-4 p-3 bg-green-500/20 border border-green-500 rounded">
                   <p className="text-sm font-semibold text-green-500">
@@ -477,7 +510,7 @@ const TokenMinter = () => {
           )}
 
           {/* Minting Form */}
-          {publicKey && tokenInfo && tokenInfo.mintAuthority === publicKey.toString() && (
+          {publicKey && tokenInfo && (
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm font-semibold text-white mb-2">
