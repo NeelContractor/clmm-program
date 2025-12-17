@@ -470,49 +470,9 @@ export function useClmmProgramAccount({ account }: { account: PublicKey }) {
     queryFn: () => program.account.tickArray.fetch(account),
   })
 
-  // const closeMutation = useMutation({
-  //   mutationKey: ['counter', 'close', { cluster, account }],
-  //   mutationFn: () => program.methods.close().accounts({ counter: account }).rpc(),
-  //   onSuccess: async (tx) => {
-  //     transactionToast(tx)
-  //     await accounts.refetch()
-  //   },
-  // })
-
-  // const decrementMutation = useMutation({
-  //   mutationKey: ['counter', 'decrement', { cluster, account }],
-  //   mutationFn: () => program.methods.decrement().accounts({ counter: account }).rpc(),
-  //   onSuccess: async (tx) => {
-  //     transactionToast(tx)
-  //     await accountQuery.refetch()
-  //   },
-  // })
-
-  // const incrementMutation = useMutation({
-  //   mutationKey: ['counter', 'increment', { cluster, account }],
-  //   mutationFn: () => program.methods.increment().accounts({ counter: account }).rpc(),
-  //   onSuccess: async (tx) => {
-  //     transactionToast(tx)
-  //     await accountQuery.refetch()
-  //   },
-  // })
-
-  // const setMutation = useMutation({
-  //   mutationKey: ['counter', 'set', { cluster, account }],
-  //   mutationFn: (value: number) => program.methods.set(value).accounts({ counter: account }).rpc(),
-  //   onSuccess: async (tx) => {
-  //     transactionToast(tx)
-  //     await accountQuery.refetch()
-  //   },
-  // })
-
   return {
     poolAccountQuery,
     positionAccountQuery,
     tickArrayAccountQuery,
-    // closeMutation,
-    // decrementMutation,
-    // incrementMutation,
-    // setMutation,
   }
 }

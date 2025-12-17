@@ -169,35 +169,34 @@ const TokenCreator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-8 font-mono">
+    <div className="min-h-screen bg-black p-8 font-mono">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-zinc-900 border-2 border-white rounded-2xl shadow-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              Solana Token Creator
+            <h1 className="text-4xl font-bold text-white mb-2">
+              TOKEN CREATOR
             </h1>
-            <p className="text-gray-600">Create SPL tokens on Solana</p>
+            <p className="text-gray-400">Create SPL tokens on Solana</p>
           </div>
 
-          <div className='flex justify-between p-2'>
-            <Link href={"/"} className='bg-black text-white rounded-xl px-5 py-2 hover:bg-gray-800'>
-              Back
+          <div className='flex justify-between p-2 mb-6'>
+            <Link href={"/"} className='bg-red-500 text-white rounded-xl px-5 py-2 hover:bg-red-600 transition-colors font-bold'>
+              ← BACK
             </Link>
             <div className='flex justify-center'>
               <WalletButton />
             </div>
           </div>
 
-
           {/* Airdrop Button (Devnet only) */}
           {wallet && network === 'devnet' && (
             <button
               onClick={requestAirdrop}
               disabled={loading}
-              className="w-full bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-600 transition-all mb-6 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-green-500 text-black font-bold py-3 px-6 rounded-lg hover:bg-green-400 transition-all mb-6 disabled:bg-gray-600 disabled:cursor-not-allowed"
             >
-              💰 Request 2 SOL Airdrop (Devnet)
+              💰 REQUEST 2 SOL AIRDROP (DEVNET)
             </button>
           )}
 
@@ -205,39 +204,39 @@ const TokenCreator = () => {
           {wallet && (
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Token Name
+                <label className="block text-sm font-semibold text-white mb-2">
+                  TOKEN NAME
                 </label>
                 <input
                   type="text"
                   value={tokenName}
                   onChange={(e) => setTokenName(e.target.value)}
                   placeholder="e.g., My Awesome Token"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Token Symbol
+                <label className="block text-sm font-semibold text-white mb-2">
+                  TOKEN SYMBOL
                 </label>
                 <input
                   type="text"
                   value={tokenSymbol}
                   onChange={(e) => setTokenSymbol(e.target.value.toUpperCase())}
                   placeholder="e.g., MAT"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
+                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-500 uppercase"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Decimals
+                <label className="block text-sm font-semibold text-white mb-2">
+                  DECIMALS
                 </label>
                 <select
                   value={decimals}
                   onChange={(e) => setDecimals(Number(e.target.value))}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white"
                 >
                   <option value={0}>0 (NFT-like)</option>
                   <option value={2}>2</option>
@@ -251,15 +250,15 @@ const TokenCreator = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Initial Supply
+                <label className="block text-sm font-semibold text-white mb-2">
+                  INITIAL SUPPLY
                 </label>
                 <input
                   type="number"
                   value={initialSupply}
                   onChange={(e) => setInitialSupply(e.target.value)}
                   placeholder="e.g., 1000000"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   The number of tokens to mint initially (in human-readable format)
@@ -269,35 +268,35 @@ const TokenCreator = () => {
               <button
                 onClick={createToken}
                 disabled={loading || !tokenName || !tokenSymbol || !initialSupply}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full bg-green-500 text-black font-bold py-4 px-6 rounded-lg hover:bg-green-400 transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-600 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {loading ? '⏳ Creating Token...' : '🚀 Create Token'}
+                {loading ? '⏳ CREATING TOKEN...' : '🚀 CREATE TOKEN'}
               </button>
             </div>
           )}
 
           {/* Status Messages */}
           {status && (
-            <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-              <p className="text-sm font-semibold text-blue-800">{status}</p>
+            <div className="mb-4 p-4 bg-green-500/20 border-2 border-green-500 rounded-lg">
+              <p className="text-sm font-semibold text-green-500">{status}</p>
             </div>
           )}
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
-              <p className="text-sm font-semibold text-red-800">{error}</p>
+            <div className="mb-4 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg">
+              <p className="text-sm font-semibold text-red-500">{error}</p>
             </div>
           )}
 
           {/* Results */}
           {createdMint && (
-            <div className="space-y-4 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg">
-              <h3 className="text-xl font-bold text-green-800 mb-4">
-                ✅ Token Created Successfully!
+            <div className="space-y-4 p-6 bg-black border-2 border-green-500 rounded-lg">
+              <h3 className="text-xl font-bold text-green-500 mb-4">
+                ✅ TOKEN CREATED SUCCESSFULLY!
               </h3>
               
               <div>
-                <p className="text-sm font-semibold text-gray-700 mb-1">
+                <p className="text-sm font-semibold text-white mb-1">
                   Token Mint Address:
                 </p>
                 <div className="flex items-center gap-2">
@@ -305,19 +304,19 @@ const TokenCreator = () => {
                     type="text"
                     value={createdMint}
                     readOnly
-                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-sm font-mono"
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-white rounded text-sm font-mono text-white"
                   />
                   <button
                     onClick={() => navigator.clipboard.writeText(createdMint)}
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm font-semibold"
+                    className="px-4 py-2 bg-green-500 text-black rounded hover:bg-green-400 text-sm font-semibold transition-colors"
                   >
-                    Copy
+                    COPY
                   </button>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-gray-700 mb-1">
+                <p className="text-sm font-semibold text-white mb-1">
                   Your Token Account Address:
                 </p>
                 <div className="flex items-center gap-2">
@@ -325,63 +324,44 @@ const TokenCreator = () => {
                     type="text"
                     value={createdATA}
                     readOnly
-                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-sm font-mono"
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-white rounded text-sm font-mono text-white"
                   />
                   <button
                     onClick={() => navigator.clipboard.writeText(createdATA)}
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm font-semibold"
+                    className="px-4 py-2 bg-green-500 text-black rounded hover:bg-green-400 text-sm font-semibold transition-colors"
                   >
-                    Copy
+                    COPY
                   </button>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-green-200">
-                <p className="text-sm text-gray-700 mb-2">
-                  <span className="font-semibold">Token Name:</span> {tokenName}
+              <div className="pt-4 border-t border-green-500">
+                <p className="text-sm text-gray-300 mb-2">
+                  <span className="font-semibold text-white">Token Name:</span> {tokenName}
                 </p>
-                <p className="text-sm text-gray-700 mb-2">
-                  <span className="font-semibold">Token Symbol:</span> {tokenSymbol}
+                <p className="text-sm text-gray-300 mb-2">
+                  <span className="font-semibold text-white">Token Symbol:</span> {tokenSymbol}
                 </p>
-                <p className="text-sm text-gray-700 mb-2">
-                  <span className="font-semibold">Decimals:</span> {decimals}
+                <p className="text-sm text-gray-300 mb-2">
+                  <span className="font-semibold text-white">Decimals:</span> {decimals}
                 </p>
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Initial Supply:</span> {initialSupply}
+                <p className="text-sm text-gray-300">
+                  <span className="font-semibold text-white">Initial Supply:</span> {initialSupply}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-green-200">
+              <div className="pt-4 border-t border-green-500">
                 <a
                   href={`https://explorer.solana.com/address/${createdMint}?cluster=${network}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block w-full text-center bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition-all"
+                  className="inline-block w-full text-center bg-white text-black font-bold py-3 px-6 rounded-lg hover:bg-gray-200 transition-all"
                 >
-                  🔍 View on Solana Explorer
+                  🔍 VIEW ON SOLANA EXPLORER
                 </a>
               </div>
             </div>
           )}
-
-          {/* Instructions */}
-          {/* <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-            <h3 className="font-bold text-gray-800 mb-3">📋 Instructions:</h3>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-              <li>Select network (Devnet for testing, Mainnet for production)</li>
-              <li>Connect your Phantom wallet</li>
-              <li>If on Devnet, request a SOL airdrop for gas fees</li>
-              <li>Fill in token details (name, symbol, decimals, supply)</li>
-              <li>Click "Create Token" and approve the transaction</li>
-              <li>Copy your Token Mint Address to use in your CLMM pool!</li>
-            </ol>
-            
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-              <p className="text-xs font-semibold text-yellow-800">
-                ⚠️ Important: Save your Token Mint Address! You'll need it to initialize your CLMM pool.
-              </p>
-            </div>
-          </div> */}
         </div>
       </div>
     </div>

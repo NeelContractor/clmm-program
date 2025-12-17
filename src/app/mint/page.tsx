@@ -314,20 +314,20 @@ const TokenMinter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-8 font-mono">
+    <div className="min-h-screen bg-black p-8 font-mono">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-zinc-900 border-2 border-white rounded-2xl shadow-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              Token Minter
+            <h1 className="text-4xl font-bold text-white mb-2">
+              TOKEN MINTER
             </h1>
-            <p className="text-gray-600">Mint additional tokens</p>
+            <p className="text-gray-400">MINT ADDITIONAL TOKENS</p>
           </div>
 
-          <div className='flex justify-between p-2'>
-            <Link href={"/"} className='bg-black text-white rounded-xl px-5 py-2 hover:bg-gray-800'>
-              Back
+          <div className='flex justify-between p-2 mb-6'>
+            <Link href={"/"} className='bg-red-500 text-white rounded-xl px-5 py-2 hover:bg-red-600 transition-colors font-bold'>
+              ← BACK
             </Link>
 
             <div className="flex justify-end">
@@ -336,8 +336,8 @@ const TokenMinter = () => {
           </div>
 
           {/* Devnet Token Quick Selector */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-lg">
-            <h3 className="text-sm font-bold text-blue-800 mb-3">⚡ Quick Select - Your Devnet Tokens</h3>
+          <div className="mb-6 p-4 bg-black border-2 border-green-500 rounded-lg">
+            <h3 className="text-sm font-bold text-green-500 mb-3">⚡ QUICK SELECT - YOUR DEVNET TOKENS</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {DEVNET_TOKENS.map((token) => (
                 <button
@@ -351,19 +351,19 @@ const TokenMinter = () => {
                   }}
                   className={`p-4 text-left border-2 rounded-lg transition-all ${
                     selectedDevnetToken === token.mint
-                      ? 'border-blue-500 bg-blue-100'
-                      : 'border-blue-200 bg-white hover:border-blue-400 hover:bg-blue-50'
+                      ? 'border-green-500 bg-green-500/20'
+                      : 'border-white bg-zinc-800 hover:border-green-500 hover:bg-zinc-700'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">
-                      {token.symbol === 'USDC' ? '💵' : '₿'}
+                      {token.symbol === 'TUSDC' ? '💵' : '₿'}
                     </span>
                     <div>
-                      <div className="font-bold text-sm text-gray-800">
+                      <div className="font-bold text-sm text-white">
                         {token.symbol} - {token.name}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-400">
                         {token.description}
                       </div>
                     </div>
@@ -371,85 +371,33 @@ const TokenMinter = () => {
                   <div className="text-xs text-gray-500 font-mono break-all">
                     {token.mint.slice(0, 20)}...{token.mint.slice(-12)}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">
-                    Decimals: <span className="font-semibold">{token.decimals}</span>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Decimals: <span className="font-semibold text-white">{token.decimals}</span>
                   </div>
                 </button>
               ))}
             </div>
-            <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
-              💡 <span className="font-semibold">Tip:</span> These are your pre-created devnet tokens. Click to select, then click "🔍 Load" below.
+            <div className="mt-3 p-2 bg-green-500/20 border border-green-500 rounded text-xs text-green-400">
+              💡 <span className="font-semibold">Tip:</span> These are your pre-created devnet tokens. Click to select, then click "LOAD" below.
             </div>
           </div>
 
           {/* Loading user tokens */}
           {loadingTokens && publicKey && (
-            <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-              <p className="text-sm font-semibold text-blue-800">
+            <div className="mb-6 p-4 bg-zinc-800 border-2 border-white rounded-lg">
+              <p className="text-sm font-semibold text-white">
                 🔍 Loading your tokens...
               </p>
             </div>
           )}
 
-          {/* User's Tokens Selector */}
-          {/* {userTokens.length > 0 && !loadingTokens && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg">
-              <h3 className="text-sm font-bold text-green-800 mb-3">
-                🎯 Your Tokens (Where You're Mint Authority)
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {userTokens.map((token, idx) => (
-                  <button
-                    key={token.mint}
-                    onClick={() => {
-                      setTokenMint(token.mint);
-                      setTokenInfo(null);
-                      setUserBalance('');
-                      setRecipientBalance('');
-                    }}
-                    className={`p-4 text-left border-2 rounded-lg transition-all ${
-                      tokenMint === token.mint
-                        ? 'border-green-500 bg-green-100'
-                        : 'border-green-200 bg-white hover:border-green-400 hover:bg-green-50'
-                    }`}
-                  >
-                    <div className="font-semibold text-sm text-gray-800 mb-1">
-                      Token #{idx + 1}
-                    </div>
-                    <div className="text-xs text-gray-500 font-mono mb-2 break-all">
-                      {token.mint.slice(0, 12)}...{token.mint.slice(-8)}
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-600">
-                        Decimals: <span className="font-semibold">{token.decimals}</span>
-                      </span>
-                      <span className="text-gray-600">
-                        Supply: <span className="font-semibold">{token.supply.toLocaleString()}</span>
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      Your Balance: <span className="font-semibold">{token.balance}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={fetchUserTokens}
-                disabled={loadingTokens}
-                className="mt-3 w-full px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:bg-gray-400"
-              >
-                🔄 Refresh Tokens
-              </button>
-            </div>
-          )} */}
-
           {/* No tokens message */}
           {publicKey && !loadingTokens && userTokens.length === 0 && (
-            <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-              <p className="text-sm font-semibold text-yellow-800 mb-2">
+            <div className="mb-6 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg">
+              <p className="text-sm font-semibold text-red-500 mb-2">
                 ℹ️ No tokens found where you're the mint authority
               </p>
-              <p className="text-xs text-yellow-700">
+              <p className="text-xs text-gray-400">
                 Create a token first using the Token Creator, then come back here to mint more!
               </p>
             </div>
@@ -457,8 +405,8 @@ const TokenMinter = () => {
 
           {/* Token Mint Input */}
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Token Mint Address
+            <label className="block text-sm font-semibold text-white mb-2">
+              TOKEN MINT ADDRESS
             </label>
             
             <div className="flex gap-2">
@@ -467,14 +415,14 @@ const TokenMinter = () => {
                 value={tokenMint}
                 onChange={(e) => setTokenMint(e.target.value)}
                 placeholder="Paste token mint address or select from above..."
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                className="flex-1 px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm text-white placeholder-gray-500"
               />
               <button
                 onClick={fetchTokenInfo}
                 disabled={!tokenMint || loadingInfo}
-                className="px-6 py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-green-500 text-black font-bold rounded-lg hover:bg-green-400 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
               >
-                {loadingInfo ? '⏳' : '🔍 Load'}
+                {loadingInfo ? '⏳' : '🔍 LOAD'}
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -484,43 +432,43 @@ const TokenMinter = () => {
 
           {/* Token Info Display */}
           {tokenInfo && (
-            <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg">
-              <h3 className="text-lg font-bold text-blue-800 mb-4">📊 Token Information</h3>
+            <div className="mb-6 p-6 bg-black border-2 border-white rounded-lg">
+              <h3 className="text-lg font-bold text-white mb-4">📊 TOKEN INFORMATION</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-semibold text-gray-700">Decimals:</span>
-                  <span className="ml-2 text-gray-600">{tokenInfo.decimals}</span>
+                  <span className="font-semibold text-gray-400">Decimals:</span>
+                  <span className="ml-2 text-white">{tokenInfo.decimals}</span>
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-700">Total Supply:</span>
-                  <span className="ml-2 text-gray-600">{tokenInfo.supply}</span>
+                  <span className="font-semibold text-gray-400">Total Supply:</span>
+                  <span className="ml-2 text-white">{tokenInfo.supply}</span>
                 </div>
                 <div className="col-span-2">
-                  <span className="font-semibold text-gray-700">Mint Authority:</span>
-                  <span className="ml-2 text-gray-600 font-mono text-xs break-all">
+                  <span className="font-semibold text-gray-400">Mint Authority:</span>
+                  <span className="ml-2 text-white font-mono text-xs break-all">
                     {tokenInfo.mintAuthority}
                   </span>
                 </div>
                 {publicKey && userBalance && (
                   <div className="col-span-2">
-                    <span className="font-semibold text-gray-700">Your Balance:</span>
-                    <span className="ml-2 text-gray-600">{userBalance}</span>
+                    <span className="font-semibold text-gray-400">Your Balance:</span>
+                    <span className="ml-2 text-white">{userBalance}</span>
                   </div>
                 )}
               </div>
 
               {/* Authority Check */}
               {publicKey && tokenInfo.mintAuthority !== publicKey.toString() && (
-                <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded">
-                  <p className="text-sm font-semibold text-red-800">
+                <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded">
+                  <p className="text-sm font-semibold text-red-500">
                     ⚠️ You are NOT the mint authority for this token. You cannot mint tokens.
                   </p>
                 </div>
               )}
 
               {publicKey && tokenInfo.mintAuthority === publicKey.toString() && (
-                <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded">
-                  <p className="text-sm font-semibold text-green-800">
+                <div className="mt-4 p-3 bg-green-500/20 border border-green-500 rounded">
+                  <p className="text-sm font-semibold text-green-500">
                     ✅ You are the mint authority. You can mint tokens!
                   </p>
                 </div>
@@ -532,36 +480,36 @@ const TokenMinter = () => {
           {publicKey && tokenInfo && tokenInfo.mintAuthority === publicKey.toString() && (
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Recipient Address
+                <label className="block text-sm font-semibold text-white mb-2">
+                  RECIPIENT ADDRESS
                 </label>
                 <input
                   type="text"
                   value={recipientAddress}
                   onChange={(e) => setRecipientAddress(e.target.value)}
                   placeholder="Recipient wallet address"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm text-white placeholder-gray-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   The wallet address that will receive the tokens
                 </p>
                 {recipientBalance && (
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-xs text-green-500 mt-1">
                     Current balance: {recipientBalance}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Amount to Mint
+                <label className="block text-sm font-semibold text-white mb-2">
+                  AMOUNT TO MINT
                 </label>
                 <input
                   type="number"
                   value={mintAmount}
                   onChange={(e) => setMintAmount(e.target.value)}
                   placeholder="e.g., 1000"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-500"
                   step="any"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -572,62 +520,25 @@ const TokenMinter = () => {
               <button
                 onClick={mintTokens}
                 disabled={loading || !mintAmount || !recipientAddress}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full bg-green-500 text-black font-bold py-4 px-6 rounded-lg hover:bg-green-400 transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-600 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {loading ? '⏳ Minting Tokens...' : '🏭 Mint Tokens'}
+                {loading ? 'MINTING TOKENS...' : 'MINT TOKENS'}
               </button>
             </div>
           )}
 
           {/* Status Messages */}
           {status && (
-            <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-              <p className="text-sm font-semibold text-blue-800">{status}</p>
+            <div className="mb-4 p-4 bg-green-500/20 border-2 border-green-500 rounded-lg">
+              <p className="text-sm font-semibold text-green-500">{status}</p>
             </div>
           )}
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
-              <p className="text-sm font-semibold text-red-800">{error}</p>
+            <div className="mb-4 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg">
+              <p className="text-sm font-semibold text-red-500">{error}</p>
             </div>
           )}
-
-          {/* Instructions */}
-          {/* <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-            <h3 className="font-bold text-gray-800 mb-3">📋 How to Mint Tokens:</h3>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-              <li>Connect your wallet (must be the mint authority)</li>
-              <li>Paste your token mint address and click 🔍 to load token info</li>
-              <li>Verify you are the mint authority (green checkmark)</li>
-              <li>Enter recipient address (defaults to your address)</li>
-              <li>Enter amount to mint in human-readable format</li>
-              <li>Click "Mint Tokens" and approve the transaction</li>
-            </ol>
-            
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-              <p className="text-xs font-semibold text-yellow-800 mb-2">
-                ⚠️ Important Notes:
-              </p>
-              <ul className="text-xs text-yellow-700 space-y-1 list-disc list-inside">
-                <li>Only the mint authority can mint new tokens</li>
-                <li>If recipient doesn't have a token account, one will be created automatically</li>
-                <li>Minting increases the total supply of the token</li>
-                <li>Be careful with decimals - the amount is multiplied by 10^decimals</li>
-              </ul>
-            </div>
-
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
-              <p className="text-xs font-semibold text-green-800 mb-2">
-                💡 Use Cases:
-              </p>
-              <ul className="text-xs text-green-700 space-y-1 list-disc list-inside">
-                <li>Mint tokens to yourself to add liquidity to your CLMM pool</li>
-                <li>Distribute tokens to team members or community</li>
-                <li>Create test tokens for development and testing</li>
-                <li>Reward users with additional tokens</li>
-              </ul>
-            </div>
-          </div> */}
         </div>
       </div>
     </div>
