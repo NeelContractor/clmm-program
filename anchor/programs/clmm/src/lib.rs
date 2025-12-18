@@ -57,10 +57,6 @@ pub mod clmm {
             upper_tick % pool.tick_spacing == 0,
             ClmmError::InvalidTickRange
         );
-        require!(
-            pool.current_tick >= lower_tick && pool.current_tick < upper_tick,
-            ClmmError::MintRangeMustCoverCurrentPrice
-        );
         require!(liquidity_amount > 0, ClmmError::InsufficientInputAmount);
 
         // Load and initialize tick arrays if needed
@@ -153,10 +149,7 @@ pub mod clmm {
         let pool = &mut ctx.accounts.pool;
         let position = &mut ctx.accounts.position;
 
-        require!(
-            pool.current_tick >= position.tick_lower && pool.current_tick < position.tick_upper,
-            ClmmError::MintRangeMustCoverCurrentPrice
-        );
+        require!(liquidity_amount > 0, ClmmError::InsufficientInputAmount);
 
         // Update tick arrays
         let lower_tick_array = &mut ctx.accounts.lower_tick_array.load_mut()?;
@@ -224,10 +217,6 @@ pub mod clmm {
         let position = &mut ctx.accounts.position;
 
         require!(liquidity_amount > 0, ClmmError::InsufficientInputAmount);
-        require!(
-            pool.current_tick >= position.tick_lower && pool.current_tick < position.tick_upper,
-            ClmmError::BurnRangeMustCoverCurrentPrice
-        );
         require!(
             position.liquidity >= liquidity_amount,
             ClmmError::NoLiquidityToRemove

@@ -49,6 +49,13 @@ const TokenMinter = () => {
       mint: 'AdtHQVQVzuL2Xc1XRf4e1GaVaQkgX16kwmPvTmgRBtES',
       decimals: 8,
       description: 'Your Test Bitcoin token'
+    },
+    {
+      name: 'Test SOL',
+      symbol: 'TSOL',
+      mint: 'DkyPc5MBnoPw7v7moi8pXhL4Sch92B9na2Tr7grx79V2',
+      decimals: 9,
+      description: 'Your Test SOL token'
     }
   ];
   
