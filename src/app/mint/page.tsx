@@ -25,7 +25,6 @@ function parseAmount(amount: string, decimals: number): string {
 }
 
 const TokenMinter = () => {
-  
   // Predefined devnet tokens
   const DEVNET_TOKENS = [
     {
@@ -116,6 +115,7 @@ const TokenMinter = () => {
       setStatus("Minting...")
 
       const amountRaw = parseAmount(mintAmount, tokenInfo.decimals)
+      console.log(amountRaw);
 
       const res = await fetch("/api/mint", {
         method: "POST",

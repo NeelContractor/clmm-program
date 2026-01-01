@@ -7,31 +7,50 @@ import {
 
 const connection = new Connection("https://api.devnet.solana.com")
 
-const MINT_AUTHORITY = Keypair.fromSecretKey(
-  Uint8Array.from(JSON.parse(process.env.NEXT_PUBLIC_MINT_AUTHORITY_KEYPAIR!))
-)
+// const MINT_AUTHORITY = Keypair.fromSecretKey(
+//   Uint8Array.from(JSON.parse(process.env.MINT_AUTHORITY_KEYPAIR!))
+// )
+function getMintAuthority(): Keypair {
+    const raw = process.env.MINT_AUTHORITY_KEYPAIR;
+  
+    if (!raw) {
+        throw new Error("MINT_AUTHORITY_KEYPAIR env var missing");
+    }
+  
+    const secret = Uint8Array.from(JSON.parse(raw));
+  
+    if (secret.length !== 64) {
+        throw new Error(
+            `Invalid mint authority key length: ${secret.length} (expected 64)`
+        );
+    }
+  
+    return Keypair.fromSecretKey(secret);
+}
 
 export async function POST(req: Request) {
   try {
     const { mint, destination, amount } = await req.json()
+
+    const mintAuthority = getMintAuthority();
 
     const mintPk = new PublicKey(mint)
     const destPk = new PublicKey(destination)
 
     const ata = await getOrCreateAssociatedTokenAccount(
       connection,
-      MINT_AUTHORITY,
+      mintAuthority,
       mintPk,
       destPk
     )
 
     const sig = await mintTo(
       connection,
-      MINT_AUTHORITY,
+      mintAuthority,
       mintPk,
       ata.address,
-      MINT_AUTHORITY,
-      BigInt(amount)
+      mintAuthority,
+      amount
     )
 
     return NextResponse.json({ signature: sig })

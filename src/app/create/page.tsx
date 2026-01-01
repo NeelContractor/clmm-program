@@ -29,7 +29,7 @@ const TokenCreator = () => {
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
   const [decimals, setDecimals] = useState(6);
-  const [initialSupply, setInitialSupply] = useState('');
+  const [initialSupply, setInitialSupply] = useState(0);
   
   // Result states
   const [createdMint, setCreatedMint] = useState('');
@@ -107,7 +107,7 @@ const TokenCreator = () => {
           mintKeypair.publicKey,
           associatedToken,
           publicKey,
-          amount,
+          initialSupply,
           [],
           TOKEN_PROGRAM_ID
         )
@@ -264,7 +264,7 @@ const TokenCreator = () => {
                 <input
                   type="number"
                   value={initialSupply}
-                  onChange={(e) => setInitialSupply(e.target.value)}
+                  onChange={(e) => setInitialSupply(Number(e.target.value))}
                   placeholder="e.g., 1000000"
                   className="w-full px-4 py-3 bg-zinc-800 border-2 border-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-500"
                 />
