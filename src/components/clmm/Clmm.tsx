@@ -1,18 +1,36 @@
+
 "use client"
 
 import { useWallet } from "@solana/wallet-adapter-react"
 import { useClmmProgram } from "./clmm-data-access";
 import { WalletButton } from "../solana/solana-provider";
 import { BN } from "bn.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { WalletConnectButton, WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
 
 const ADMIN_PUBKEY = new PublicKey("GToMxgF4JcNn8dmNiHt2JrrvLaW6S1zSPoL2W8K2Wkmi");
 
 export default function Clmm() {
-    const { publicKey } = useWallet();
+    const { publicKey, connecting, connected, wallet } = useWallet();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Debug wallet state
+    useEffect(() => {
+        if (mounted && connected && publicKey) {
+            console.log('✅ Wallet connected:', {
+                publicKey: publicKey.toString(),
+                walletName: wallet?.adapter.name
+            });
+        }
+    }, [connected, publicKey, wallet?.adapter.name, mounted]);
+
     const { 
         initializePoolHandler, 
         increaseLiquidityHandler, 
@@ -184,30 +202,43 @@ export default function Clmm() {
         }
     };
 
-    if (!publicKey) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 font-mono">
-                <div className="bg-zinc-900 border-2 border-white rounded-2xl p-12 shadow-2xl max-w-md w-full">
-                    <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center p-5 bg-green-500/20 rounded-2xl mb-6 border-2 border-green-500">
-                            <svg className="w-20 h-20 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <h1 className="text-6xl font-extrabold mb-4 text-white">
-                            CLMM
-                        </h1>
-                        <p className="text-gray-400 text-xl font-medium">CONCENTRATED LIQUIDITY MARKET MAKER</p>
-                        <div className="mt-4 h-1 w-32 mx-auto bg-green-500 rounded-full"></div>
-                    </div>
-                    <p className="text-gray-500 mb-8 text-center text-lg">CONNECT WALLET TO ACCESS POOLS</p>
-                    <div className="flex justify-center">
-                        <WalletButton />
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    // if (connecting) {
+    //     return (
+    //         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 font-mono">
+    //             <div className="bg-zinc-900 border-2 border-white rounded-2xl p-12 shadow-2xl max-w-md w-full">
+    //                 <div className="text-center">
+    //                     <div className="inline-block w-12 h-12 border-4 border-zinc-800 border-t-green-500 rounded-full animate-spin mb-4"></div>
+    //                     <p className="text-gray-400 text-xl">Connecting wallet...</p>
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     );
+    // }
+
+    // if (!publicKey) {
+    //     return (
+    //         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 font-mono">
+    //             <div className="bg-zinc-900 border-2 border-white rounded-2xl p-12 shadow-2xl max-w-md w-full">
+    //                 <div className="text-center mb-8">
+    //                     <div className="inline-flex items-center justify-center p-5 bg-green-500/20 rounded-2xl mb-6 border-2 border-green-500">
+    //                         <svg className="w-20 h-20 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    //                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+    //                         </svg>
+    //                     </div>
+    //                     <h1 className="text-6xl font-extrabold mb-4 text-white">
+    //                         CLMM
+    //                     </h1>
+    //                     <p className="text-gray-400 text-xl font-medium">CONCENTRATED LIQUIDITY MARKET MAKER</p>
+    //                     <div className="mt-4 h-1 w-32 mx-auto bg-green-500 rounded-full"></div>
+    //                 </div>
+    //                 <p className="text-gray-500 mb-8 text-center text-lg">CONNECT WALLET TO ACCESS POOLS</p>
+    //                 <div className="flex justify-center">
+    //                     <WalletButton />
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-8 font-mono">
@@ -236,7 +267,15 @@ export default function Clmm() {
                             MINT TOKENS
                         </Link>
                         
-                        <WalletButton />
+                        {!connected ? (
+                            <div>
+                                <WalletButton />      
+                            </div>
+                        ): (
+                            <div>
+                                <WalletButton />
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -261,7 +300,16 @@ export default function Clmm() {
                             <div>
                                 <div className="text-gray-500 text-sm mb-1 font-medium">YOUR POSITIONS</div>
                                 <div className="text-4xl font-extrabold text-white">
-                                    {positionAccounts.data?.filter(p => p.account.owner.equals(publicKey)).length || 0}
+                                    {/* {positionAccounts.data?.filter(p => p.account.owner.equals(publicKey)).length || 0} */}
+                                    {publicKey ? (
+                                        <div>
+                                            {positionAccounts.data?.filter(p => p.account.owner.equals(publicKey)).length || 0}
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <p>0</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center border-2 border-white">
@@ -456,9 +504,59 @@ export default function Clmm() {
 
                         <div className="bg-zinc-900 border-2 border-white rounded-2xl p-6">
                             <h2 className="text-2xl font-bold mb-4">YOUR POSITIONS</h2>
-                            {positionAccounts.isLoading ? (
+                            {/* {publicKey && publicKey !== null && positionAccounts.isLoading ? (
                                 <div className="text-center py-8 text-zinc-500">Loading...</div>
                             ) : positionAccounts.data?.filter(p => p.account.owner.equals(publicKey))?.length === 0 ? (
+                                <div className="text-center py-8 text-zinc-500">No positions found</div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {positionAccounts.data?.filter(p => p.account.owner.equals(publicKey)).map((position) => (
+                                        <div key={position.publicKey.toString()} className="bg-black border-2 border-white rounded-xl p-5">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">POSITION</p>
+                                                    <p className="font-mono text-sm text-gray-400 break-all">{position.publicKey.toString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">LIQUIDITY</p>
+                                                    <p className="text-sm font-semibold text-green-500">{position.account.liquidity.toString()}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">LOWER TICK</p>
+                                                    <p className="text-sm font-semibold text-white">{position.account.tickLower}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">UPPER TICK</p>
+                                                    <p className="text-sm font-semibold text-white">{position.account.tickUpper}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">POOL</p>
+                                                    <p className="font-mono text-xs text-gray-400 truncate">{position.account.pool.toString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-4">
+                                                <button
+                                                    onClick={() => setIncreaseLiqForm({ ...increaseLiqForm, positionAddress: position.publicKey.toString() })}
+                                                    className="flex-1 bg-green-500 hover:bg-green-400 text-black py-2 rounded-lg transition-all text-sm font-semibold"
+                                                >
+                                                    INCREASE
+                                                </button>
+                                                <button
+                                                    onClick={() => setDecreaseLiqForm({ ...decreaseLiqForm, positionAddress: position.publicKey.toString() })}
+                                                    className="flex-1 bg-red-500 hover:bg-red-400 text-white py-2 rounded-lg transition-all text-sm font-semibold"
+                                                >
+                                                    DECREASE
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )} */}
+                            {publicKey && positionAccounts.isLoading ? (
+                                <div className="text-center py-8 text-zinc-500">Loading...</div>
+                            ) : !publicKey || positionAccounts.data?.filter(p => p.account.owner.equals(publicKey))?.length === 0 ? (
                                 <div className="text-center py-8 text-zinc-500">No positions found</div>
                             ) : (
                                 <div className="space-y-4">
@@ -826,7 +924,16 @@ export default function Clmm() {
                     <div className="bg-zinc-900 border-2 border-white rounded-2xl p-6 transition-all transform hover:scale-[1.02]">
                         <div className="text-slate-400 text-sm mb-2">YOUR POSITIONS</div>
                         <div className="text-3xl font-bold text-purple-400">
-                            {positionAccounts.data?.filter(p => p.account.owner.equals(publicKey)).length || 0}
+                            {/* {positionAccounts.data?.filter(p => p.account.owner.equals(publicKey)).length || 0} */}
+                            {publicKey ? (
+                                <div>
+                                    {positionAccounts.data?.filter(p => p.account.owner.equals(publicKey)).length || 0}
+                                </div>
+                            ) : (
+                                <div>
+                                    <p>0</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="bg-zinc-900 border-2 border-white rounded-2xl p-6 transition-all transform hover:scale-[1.02]">
