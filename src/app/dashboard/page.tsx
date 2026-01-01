@@ -1,11 +1,10 @@
 "use client"
+
 import { useClmmProgram } from "@/components/clmm/clmm-data-access";
 import { WalletButton } from "@/components/solana/solana-provider";
-import { useWallet } from "@solana/wallet-adapter-react";
 import Link from "next/link";
 
 export default function Page() {
-    const { publicKey } = useWallet();
     const { positionAccounts } = useClmmProgram();
 
     return (

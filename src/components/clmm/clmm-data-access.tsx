@@ -9,7 +9,7 @@ import { useCluster } from '../cluster/cluster-data-access'
 import { useAnchorProvider } from '../solana/solana-provider'
 import { useTransactionToast } from '../use-transaction-toast'
 import { toast } from 'sonner'
-import { createAssociatedTokenAccount, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import BN from 'bn.js'
 
 interface InitializePoolArgs {
@@ -85,33 +85,33 @@ function getTickArrayStartIndex(tick: number, tickSpacing: number): number {
 }
 
 // Helper to ensure token mints are in correct order (token0 < token1)
-function sortTokenMints(mint0: PublicKey, mint1: PublicKey): [PublicKey, PublicKey] {
-  const mint0Bytes = mint0.toBuffer();
-  const mint1Bytes = mint1.toBuffer();
+// function sortTokenMints(mint0: PublicKey, mint1: PublicKey): [PublicKey, PublicKey] {
+//   const mint0Bytes = mint0.toBuffer();
+//   const mint1Bytes = mint1.toBuffer();
   
-  for (let i = 0; i < 32; i++) {
-    if (mint0Bytes[i] < mint1Bytes[i]) {
-      return [mint0, mint1];
-    } else if (mint0Bytes[i] > mint1Bytes[i]) {
-      return [mint1, mint0];
-    }
-  }
+//   for (let i = 0; i < 32; i++) {
+//     if (mint0Bytes[i] < mint1Bytes[i]) {
+//       return [mint0, mint1];
+//     } else if (mint0Bytes[i] > mint1Bytes[i]) {
+//       return [mint1, mint0];
+//     }
+//   }
   
-  // If they're equal (which shouldn't happen), just return as-is
-  return [mint0, mint1];
-}
+//   // If they're equal (which shouldn't happen), just return as-is
+//   return [mint0, mint1];
+// }
 
-// Validate tick alignment with tick spacing
-function validateTickAlignment(tick: number, tickSpacing: number): boolean {
-  return tick % tickSpacing === 0;
-}
+// // Validate tick alignment with tick spacing
+// function validateTickAlignment(tick: number, tickSpacing: number): boolean {
+//   return tick % tickSpacing === 0;
+// }
 
-// Validate tick is within bounds
-function validateTickBounds(tick: number): boolean {
-  const MIN_TICK = -443636;
-  const MAX_TICK = 443636;
-  return tick >= MIN_TICK && tick <= MAX_TICK;
-}
+// // Validate tick is within bounds
+// function validateTickBounds(tick: number): boolean {
+//   const MIN_TICK = -443636;
+//   const MAX_TICK = 443636;
+//   return tick >= MIN_TICK && tick <= MAX_TICK;
+// }
 
 export function useClmmProgram() {
   const { connection } = useConnection()

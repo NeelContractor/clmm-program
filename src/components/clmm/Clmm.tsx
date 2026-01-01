@@ -9,27 +9,30 @@ import { useEffect, useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { WalletConnectButton, WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
 
 const ADMIN_PUBKEY = new PublicKey("GToMxgF4JcNn8dmNiHt2JrrvLaW6S1zSPoL2W8K2Wkmi");
 
 export default function Clmm() {
-    const { publicKey, connecting, connected, wallet } = useWallet();
-    const [mounted, setMounted] = useState(false);
+    const { publicKey, 
+        // connecting, 
+        connected, 
+        // wallet 
+    } = useWallet();
+    // const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    // useEffect(() => {
+    //     setMounted(true);
+    // }, []);
 
     // Debug wallet state
-    useEffect(() => {
-        if (mounted && connected && publicKey) {
-            console.log('✅ Wallet connected:', {
-                publicKey: publicKey.toString(),
-                walletName: wallet?.adapter.name
-            });
-        }
-    }, [connected, publicKey, wallet?.adapter.name, mounted]);
+    // useEffect(() => {
+    //     if (mounted && connected && publicKey) {
+    //         console.log('✅ Wallet connected:', {
+    //             publicKey: publicKey.toString(),
+    //             walletName: wallet?.adapter.name
+    //         });
+    //     }
+    // }, [connected, publicKey, wallet?.adapter.name, mounted]);
 
     const { 
         initializePoolHandler, 

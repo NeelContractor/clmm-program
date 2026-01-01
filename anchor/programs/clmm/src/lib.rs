@@ -2,7 +2,6 @@
 #![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
-use bytemuck::{Pod, Zeroable};
 
 declare_id!("88KQMA65EwtZwyFCF16mAMZgNPjdcQCSwr2PXnMsKFEZ");
 

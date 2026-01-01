@@ -1,39 +1,31 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import { Keypair, PublicKey, Transaction } from '@solana/web3.js';
-import { 
-  createMintToInstruction,
-  getAssociatedTokenAddress,
-  createAssociatedTokenAccountInstruction,
-  TOKEN_PROGRAM_ID,
+import { useState, useEffect } from "react"
+import { PublicKey } from "@solana/web3.js"
+import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
-  getMint,
   getAccount,
-  getOrCreateAssociatedTokenAccount,
-  mintTo,
-  initializeMint2InstructionData,
-  initializeMintInstructionData,
-  createInitializeMint2Instruction
-} from '@solana/spl-token';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { WalletButton } from '@/components/solana/solana-provider';
-import Link from 'next/link';
-import bs58 from "bs58";
-// import dotenv from "dotenv";
-// dotenv.config();
+  getAssociatedTokenAddress,
+  // getAssociatedTokenAddress,
+  getMint,
+  TOKEN_PROGRAM_ID,
+  // getAccount,
+  // TOKEN_PROGRAM_ID,
+  // ASSOCIATED_TOKEN_PROGRAM_ID,
+} from "@solana/spl-token"
+import { useConnection, useWallet } from "@solana/wallet-adapter-react"
+import { WalletButton } from "@/components/solana/solana-provider"
+import Link from "next/link"
 
-// const MINT_AUTHORITY = new PublicKey("GToMxgF4JcNn8dmNiHt2JrrvLaW6S1zSPoL2W8K2Wkmi");
-// TODO: Add logic to other users to mint tokens
+/* ---------- helpers ---------- */
+function parseAmount(amount: string, decimals: number): string {
+  const [whole, frac = ""] = amount.split(".")
+  const padded = frac.padEnd(decimals, "0").slice(0, decimals)
+  return (BigInt(whole + padded)).toString()
+}
 
 const TokenMinter = () => {
-  const { publicKey, signTransaction, wallet } = useWallet();
-  const { connection } = useConnection();
-
-  let key = Uint8Array.from(JSON.parse(process.env.NEXT_PUBLIC_MINT_AUTHORITY_KEYPAIR!))
-  const MINT_AUTHORITY = Keypair.fromSecretKey(key);
-
-  // console.log("MINT_AUTHORITY: ", MINT_AUTHORITY.publicKey.toBase58());
+  
   // Predefined devnet tokens
   const DEVNET_TOKENS = [
     {
@@ -60,23 +52,92 @@ const TokenMinter = () => {
   ];
   
   // Form states
-  const [tokenMint, setTokenMint] = useState('');
-  const [mintAmount, setMintAmount] = useState('');
-  const [recipientAddress, setRecipientAddress] = useState('');
+  // const [tokenMint, setTokenMint] = useState('');
+  // const [mintAmount, setMintAmount] = useState('');
+  // const [recipientAddress, setRecipientAddress] = useState('');
   const [selectedDevnetToken, setSelectedDevnetToken] = useState('');
   
   // Token info states
-  const [tokenInfo, setTokenInfo] = useState<any>(null);
+  // const [tokenInfo, setTokenInfo] = useState<any>(null);
   const [userBalance, setUserBalance] = useState<string>('');
   const [recipientBalance, setRecipientBalance] = useState<string>('');
   const [userTokens, setUserTokens] = useState<any[]>([]);
   const [loadingTokens, setLoadingTokens] = useState(false);
   
   // UI states
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [loadingInfo, setLoadingInfo] = useState(false);
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  // const [status, setStatus] = useState('');
+  // const [error, setError] = useState('');
+
+  const { connection } = useConnection()
+  const { publicKey } = useWallet()
+
+  const [tokenMint, setTokenMint] = useState("")
+  const [mintAmount, setMintAmount] = useState("")
+  const [recipientAddress, setRecipientAddress] = useState("")
+  const [tokenInfo, setTokenInfo] = useState<any>(null)
+  const [status, setStatus] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (publicKey && !recipientAddress) {
+      setRecipientAddress(publicKey.toBase58())
+    }
+  }, [publicKey])
+
+  /* ---------- fetch token info ---------- */
+  const fetchTokenInfo = async () => {
+    try {
+      setError("")
+      const mintPk = new PublicKey(tokenMint)
+      const mint = await getMint(connection, mintPk)
+
+      setTokenInfo({
+        decimals: mint.decimals,
+        supply: mint.supply.toString(),
+        mintAuthority: mint.mintAuthority?.toBase58() ?? "None",
+      })
+
+      setStatus("Token loaded")
+    } catch (e: any) {
+      setError(e.message)
+      setTokenInfo(null)
+    }
+  }
+
+  /* ---------- mint ---------- */
+  const mintTokens = async () => {
+    if (!tokenInfo || !publicKey) return
+
+    try {
+      setLoading(true)
+      setStatus("Minting...")
+
+      const amountRaw = parseAmount(mintAmount, tokenInfo.decimals)
+
+      const res = await fetch("/api/mint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mint: tokenMint,
+          destination: recipientAddress,
+          amount: amountRaw,
+        }),
+      })
+
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+
+      setStatus(`✅ Minted successfully: ${json.signature}`)
+      setMintAmount("")
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Auto-fill recipient with user's address
   useEffect(() => {
@@ -136,49 +197,49 @@ const TokenMinter = () => {
   };
 
   // Fetch token info
-  const fetchTokenInfo = async () => {
-    if (!tokenMint || !connection) return;
+  // const fetchTokenInfo = async () => {
+  //   if (!tokenMint || !connection) return;
 
-    try {
-      setLoadingInfo(true);
-      setError('');
+  //   try {
+  //     setLoadingInfo(true);
+  //     setError('');
       
-      const mintPubkey = new PublicKey(tokenMint);
-      const mintInfo = await getMint(connection, mintPubkey);
+  //     const mintPubkey = new PublicKey(tokenMint);
+  //     const mintInfo = await getMint(connection, mintPubkey);
       
-      setTokenInfo({
-        address: tokenMint,
-        decimals: mintInfo.decimals,
-        supply: (Number(mintInfo.supply) / Math.pow(10, mintInfo.decimals)).toLocaleString(),
-        mintAuthority: mintInfo.mintAuthority?.toString() || 'None',
-        freezeAuthority: mintInfo.freezeAuthority?.toString() || 'None',
-      });
+  //     setTokenInfo({
+  //       address: tokenMint,
+  //       decimals: mintInfo.decimals,
+  //       supply: (Number(mintInfo.supply) / Math.pow(10, mintInfo.decimals)).toLocaleString(),
+  //       mintAuthority: mintInfo.mintAuthority?.toString() || 'None',
+  //       freezeAuthority: mintInfo.freezeAuthority?.toString() || 'None',
+  //     });
 
-      // Get user's token balance if connected
-      if (publicKey) {
-        try {
-          const userATA = await getAssociatedTokenAddress(
-            mintPubkey,
-            publicKey,
-            false,
-            TOKEN_PROGRAM_ID,
-            ASSOCIATED_TOKEN_PROGRAM_ID
-          );
-          const accountInfo = await getAccount(connection, userATA);
-          setUserBalance((Number(accountInfo.amount) / Math.pow(10, mintInfo.decimals)).toLocaleString());
-        } catch {
-          setUserBalance('0 (No token account)');
-        }
-      }
+  //     // Get user's token balance if connected
+  //     if (publicKey) {
+  //       try {
+  //         const userATA = await getAssociatedTokenAddress(
+  //           mintPubkey,
+  //           publicKey,
+  //           false,
+  //           TOKEN_PROGRAM_ID,
+  //           ASSOCIATED_TOKEN_PROGRAM_ID
+  //         );
+  //         const accountInfo = await getAccount(connection, userATA);
+  //         setUserBalance((Number(accountInfo.amount) / Math.pow(10, mintInfo.decimals)).toLocaleString());
+  //       } catch {
+  //         setUserBalance('0 (No token account)');
+  //       }
+  //     }
 
-      setStatus('Token info loaded successfully');
-    } catch (err: any) {
-      setError(`Failed to fetch token info: ${err.message}`);
-      setTokenInfo(null);
-    } finally {
-      setLoadingInfo(false);
-    }
-  };
+  //     setStatus('Token info loaded successfully');
+  //   } catch (err: any) {
+  //     setError(`Failed to fetch token info: ${err.message}`);
+  //     setTokenInfo(null);
+  //   } finally {
+  //     setLoadingInfo(false);
+  //   }
+  // };
 
   // Check recipient balance
   const checkRecipientBalance = async () => {
@@ -210,156 +271,156 @@ const TokenMinter = () => {
   }, [recipientAddress, tokenInfo]);
 
   // Mint tokens
-  const mintTokens = async () => {
-    if (!publicKey || !connection) {
-      setError('Please connect your wallet first');
-      return;
-    }
+  // const mintTokens = async () => {
+  //   if (!publicKey || !connection) {
+  //     setError('Please connect your wallet first');
+  //     return;
+  //   }
 
-    if (!signTransaction) {
-      setError('Wallet does not support signing transactions');
-      return;
-    }
+  //   if (!signTransaction) {
+  //     setError('Wallet does not support signing transactions');
+  //     return;
+  //   }
 
-    if (!tokenMint || !mintAmount || !recipientAddress) {
-      setError('Please fill in all fields');
-      return;
-    }
+  //   if (!tokenMint || !mintAmount || !recipientAddress) {
+  //     setError('Please fill in all fields');
+  //     return;
+  //   }
 
-    if (!tokenInfo) {
-      setError('Please load token info first');
-      return;
-    }
+  //   if (!tokenInfo) {
+  //     setError('Please load token info first');
+  //     return;
+  //   }
 
-    setLoading(true);
-    setStatus('Preparing to mint tokens...');
-    setError('');
+  //   setLoading(true);
+  //   setStatus('Preparing to mint tokens...');
+  //   setError('');
 
-    try {
-      const mintPubkey = new PublicKey(tokenMint);
-      const recipientPubkey = new PublicKey(recipientAddress);
+  //   try {
+  //     const mintPubkey = new PublicKey(tokenMint);
+  //     const recipientPubkey = new PublicKey(recipientAddress);
 
-      // Get recipient's associated token account
-      const recipientATA = await getAssociatedTokenAddress(
-        mintPubkey,
-        recipientPubkey,
-        // false,
-        // TOKEN_PROGRAM_ID,
-        // ASSOCIATED_TOKEN_PROGRAM_ID
-      );
+  //     // Get recipient's associated token account
+  //     const recipientATA = await getAssociatedTokenAddress(
+  //       mintPubkey,
+  //       recipientPubkey,
+  //       // false,
+  //       // TOKEN_PROGRAM_ID,
+  //       // ASSOCIATED_TOKEN_PROGRAM_ID
+  //     );
 
-      const transaction = new Transaction();
+  //     const transaction = new Transaction();
 
-      // Check if recipient's token account exists
-      setStatus('Checking recipient token account...');
-      const accountInfo = await connection.getAccountInfo(recipientATA);
+  //     // Check if recipient's token account exists
+  //     setStatus('Checking recipient token account...');
+  //     const accountInfo = await connection.getAccountInfo(recipientATA);
       
-      if (!accountInfo) {
-        setStatus('Creating token account for recipient...');
-        // Create associated token account for recipient
-        transaction.add(
-          createAssociatedTokenAccountInstruction(
-            publicKey, // payer
-            recipientATA, // associated token address
-            recipientPubkey, // owner
-            mintPubkey, // mint
-            TOKEN_PROGRAM_ID,
-            ASSOCIATED_TOKEN_PROGRAM_ID
-          )
-        );
-      }
+  //     if (!accountInfo) {
+  //       setStatus('Creating token account for recipient...');
+  //       // Create associated token account for recipient
+  //       transaction.add(
+  //         createAssociatedTokenAccountInstruction(
+  //           publicKey, // payer
+  //           recipientATA, // associated token address
+  //           recipientPubkey, // owner
+  //           mintPubkey, // mint
+  //           TOKEN_PROGRAM_ID,
+  //           ASSOCIATED_TOKEN_PROGRAM_ID
+  //         )
+  //       );
+  //     }
 
-      // Add mint instruction
-      setStatus('Adding mint instruction...');
-      const mintAmountRaw = BigInt(
-        parseFloat(mintAmount) * Math.pow(10, tokenInfo.decimals)
-      );
+  //     // Add mint instruction
+  //     setStatus('Adding mint instruction...');
+  //     const mintAmountRaw = BigInt(
+  //       parseFloat(mintAmount) * Math.pow(10, tokenInfo.decimals)
+  //     );
 
-      const recipientAssociatedTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection, MINT_AUTHORITY, mintPubkey, publicKey
-      )
+  //     const recipientAssociatedTokenAccount = await getOrCreateAssociatedTokenAccount(
+  //       connection, MINT_AUTHORITY, mintPubkey, publicKey
+  //     )
 
-      // const recipientAssociatedTokenAccount = await getAssociatedTokenAddress(
-      //   mintPubkey,
-      //   publicKey
-      // );
+  //     // const recipientAssociatedTokenAccount = await getAssociatedTokenAddress(
+  //     //   mintPubkey,
+  //     //   publicKey
+  //     // );
 
-    const transactionSignature = await mintTo(
-        connection,
-        MINT_AUTHORITY,
-        mintPubkey,
-        recipientAssociatedTokenAccount.address,
-        MINT_AUTHORITY,
-        mintAmountRaw
-    )
+  //   const transactionSignature = await mintTo(
+  //       connection,
+  //       MINT_AUTHORITY,
+  //       mintPubkey,
+  //       recipientAssociatedTokenAccount.address,
+  //       MINT_AUTHORITY,
+  //       mintAmountRaw
+  //   )
 
-    // const link = getExplorerLink("transaction", transactionSignature, "devnet");
-    console.log(transactionSignature);
+  //   // const link = getExplorerLink("transaction", transactionSignature, "devnet");
+  //   console.log(transactionSignature);
 
-      // const tx = await fetch("/api/mint", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     mint: mintPubkey.toBase58(),         
-      //     destination: recipientATA.toBase58(),
-      //     amount: mintAmountRaw.toString(),    
-      //   }),
-      // });
+  //     // const tx = await fetch("/api/mint", {
+  //     //   method: "POST",
+  //     //   headers: {
+  //     //     "Content-Type": "application/json",
+  //     //   },
+  //     //   body: JSON.stringify({
+  //     //     mint: mintPubkey.toBase58(),         
+  //     //     destination: recipientATA.toBase58(),
+  //     //     amount: mintAmountRaw.toString(),    
+  //     //   }),
+  //     // });
 
-      // console.log("tx: ", tx);
+  //     // console.log("tx: ", tx);
 
-      // transaction.add(
-      //   createMintToInstruction(
-      //     mintPubkey,
-      //     recipientATA,
-      //     MINT_AUTHORITY.publicKey,
-      //     mintAmountRaw,
-      //     [],
-      //     TOKEN_PROGRAM_ID
-      //   )
-      // );
+  //     // transaction.add(
+  //     //   createMintToInstruction(
+  //     //     mintPubkey,
+  //     //     recipientATA,
+  //     //     MINT_AUTHORITY.publicKey,
+  //     //     mintAmountRaw,
+  //     //     [],
+  //     //     TOKEN_PROGRAM_ID
+  //     //   )
+  //     // );
 
-      // // Get recent blockhash
-      // setStatus('Getting recent blockhash...');
-      // const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
-      // transaction.recentBlockhash = blockhash;
-      // transaction.feePayer = publicKey;
+  //     // // Get recent blockhash
+  //     // setStatus('Getting recent blockhash...');
+  //     // const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+  //     // transaction.recentBlockhash = blockhash;
+  //     // transaction.feePayer = publicKey;
 
-      // // Sign transaction
-      // setStatus('Signing transaction...');
-      // const signed = await signTransaction(transaction);
+  //     // // Sign transaction
+  //     // setStatus('Signing transaction...');
+  //     // const signed = await signTransaction(transaction);
 
-      // // Send transaction
-      // setStatus('Sending transaction...');
-      // const signature = await connection.sendRawTransaction(signed.serialize()); // TODO: failing because of MINT_AUHTORITY didnt sign the txn
+  //     // // Send transaction
+  //     // setStatus('Sending transaction...');
+  //     // const signature = await connection.sendRawTransaction(signed.serialize()); // TODO: failing because of MINT_AUHTORITY didnt sign the txn
 
-      // Confirm transaction
-      // setStatus('Confirming transaction...');
-      // await connection.confirmTransaction({
-      //   signature,
-      //   blockhash,
-      //   lastValidBlockHeight
-      // });
+  //     // Confirm transaction
+  //     // setStatus('Confirming transaction...');
+  //     // await connection.confirmTransaction({
+  //     //   signature,
+  //     //   blockhash,
+  //     //   lastValidBlockHeight
+  //     // });
 
-      setStatus(`✅ Successfully minted ${mintAmount} tokens!`);
-      setError('');
+  //     setStatus(`✅ Successfully minted ${mintAmount} tokens!`);
+  //     setError('');
 
-      // Refresh balances
-      await fetchTokenInfo();
-      await checkRecipientBalance();
+  //     // Refresh balances
+  //     await fetchTokenInfo();
+  //     await checkRecipientBalance();
 
-      // Clear form
-      setMintAmount('');
-    } catch (err: any) {
-      console.error('Error minting tokens:', err);
-      setError(`Failed to mint tokens: ${err.message || err}`);
-      setStatus('');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     // Clear form
+  //     setMintAmount('');
+  //   } catch (err: any) {
+  //     console.error('Error minting tokens:', err);
+  //     setError(`Failed to mint tokens: ${err.message || err}`);
+  //     setStatus('');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-black p-8 font-mono">

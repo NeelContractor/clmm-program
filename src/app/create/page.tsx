@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState } from 'react';
-import { Connection, Keypair, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
+import { useEffect, useState } from 'react';
+import { Keypair, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
 import { 
   createInitializeMintInstruction, 
   createAssociatedTokenAccountInstruction,
@@ -72,6 +72,8 @@ const TokenCreator = () => {
       );
       setCreatedATA(associatedToken.toString());
 
+      const amount = BigInt(initialSupply) * BigInt(10 ** decimals);
+
       // Create transaction
       const transaction = new Transaction().add(
         // Create mint account
@@ -100,11 +102,12 @@ const TokenCreator = () => {
           ASSOCIATED_TOKEN_PROGRAM_ID
         ),
         // Mint tokens to the associated token account
+        
         createMintToInstruction(
           mintKeypair.publicKey,
           associatedToken,
           publicKey,
-          BigInt(parseFloat(initialSupply) * Math.pow(10, decimals)),
+          amount,
           [],
           TOKEN_PROGRAM_ID
         )
@@ -164,9 +167,14 @@ const TokenCreator = () => {
     }
   };
 
-  if (!publicKey?.equals(ADMIN_PUBKEY)) {
-    return route.push("/");
-  }
+  // if (!publicKey?.equals(ADMIN_PUBKEY)) {
+  //   return route.push("/");
+  // }
+  useEffect(() => {
+    if (publicKey && !publicKey.equals(ADMIN_PUBKEY)) {
+      route.replace("/");
+    }
+  }, [publicKey, route]);
 
   return (
     <div className="min-h-screen bg-black p-8 font-mono">
@@ -351,14 +359,14 @@ const TokenCreator = () => {
               </div>
 
               <div className="pt-4 border-t border-green-500">
-                <a
+                <Link
                   href={`https://explorer.solana.com/address/${createdMint}?cluster=${network}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block w-full text-center bg-white text-black font-bold py-3 px-6 rounded-lg hover:bg-gray-200 transition-all"
                 >
                   🔍 VIEW ON SOLANA EXPLORER
-                </a>
+                </Link>
               </div>
             </div>
           )}
